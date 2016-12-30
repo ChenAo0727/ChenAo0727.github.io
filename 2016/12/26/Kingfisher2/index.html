@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="Chen Ao" />
+
+
+
+<meta name="description" content="ImageDownloader在Kingfisher 中，该类主要负责图片的网络下载，其实现原理是基于系统的URLSession ,实现它的代理方法。下面是几个主要部分：
+
+ImageFetchLoad
+URLSession的配置
+下载方法
+取消下载
+URLSession 代理方法
+下载某张特定图片">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kingfisher 3.x 学习（二）">
+<meta property="og:url" content="http://ChenAo0727.github.io/2016/12/26/Kingfisher2/index.html">
+<meta property="og:site_name" content="夜空中最亮的星">
+<meta property="og:description" content="ImageDownloader在Kingfisher 中，该类主要负责图片的网络下载，其实现原理是基于系统的URLSession ,实现它的代理方法。下面是几个主要部分：
+
+ImageFetchLoad
+URLSession的配置
+下载方法
+取消下载
+URLSession 代理方法
+下载某张特定图片">
+<meta property="og:updated_time" content="2016-12-28T09:55:38.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Kingfisher 3.x 学习（二）">
+<meta name="twitter:description" content="ImageDownloader在Kingfisher 中，该类主要负责图片的网络下载，其实现原理是基于系统的URLSession ,实现它的代理方法。下面是几个主要部分：
+
+ImageFetchLoad
+URLSession的配置
+下载方法
+取消下载
+URLSession 代理方法
+下载某张特定图片">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="夜空中最亮的星" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/favicon.png">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>Kingfisher 3.x 学习（二） | 夜空中最亮的星</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/bg.png" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">Chen Ao</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">生于忧患，死于安乐</p>
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="false" />
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class='no-result'>No results found <i class='fa fa-spinner fa-pulse'></i></p>
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                            <li><a href="/about/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto:jim735410965@126.com" title="Email"></a>
+                            
+                                <a class="fa 新浪微博" href="http://weibo.com/u/1773408564" title="新浪微博"></a>
+                            
+                                <a class="fa GitHub" href="https://github.com/ChenAo0727" title="GitHub"></a>
+                            
+                                <a class="fa 简书" href="http://www.jianshu.com/users/872519599961/latest_articles" title="简书"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/swift/">swift</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io">Hexo</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://pages.github.com/">GitHub</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.xyz/">MOxFIVE</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">毕业于杭电的一名普通的iOS Coder</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">Chen Ao</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/bg.png" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">Chen Ao</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">生于忧患，死于安乐</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                    <li><a href="/about/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto:jim735410965@126.com" title="Email"></a>
+                            
+                                <a class="fa 新浪微博" target="_blank" href="http://weibo.com/u/1773408564" title="新浪微博"></a>
+                            
+                                <a class="fa GitHub" target="_blank" href="https://github.com/ChenAo0727" title="GitHub"></a>
+                            
+                                <a class="fa 简书" target="_blank" href="http://www.jianshu.com/users/872519599961/latest_articles" title="简书"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-Kingfisher2" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2016/12/26/Kingfisher2/" class="article-date">
+      <time datetime="2016-12-26T12:39:39.000Z" itemprop="datePublished">2016-12-26</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kingfisher 3.x 学习（二）
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/术业专攻/">术业专攻</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/swift/">swift</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <h2 id="ImageDownloader"><a href="#ImageDownloader" class="headerlink" title="ImageDownloader"></a>ImageDownloader</h2><p>在<code>Kingfisher</code> 中，该类主要负责图片的网络下载，其实现原理是基于系统的<code>URLSession</code> ,实现它的代理方法。下面是几个主要部分：</p>
+<ul>
+<li>ImageFetchLoad</li>
+<li>URLSession的配置</li>
+<li>下载方法</li>
+<li>取消下载</li>
+<li>URLSession 代理方法</li>
+<li>下载某张特定图片<a id="more"></a>
+</li>
+</ul>
+<h3 id="ImageFetchLoad"><a href="#ImageFetchLoad" class="headerlink" title="ImageFetchLoad"></a>ImageFetchLoad</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">class ImageFetchLoad &#123;</div><div class="line">     var contents = [(callback: CallbackPair, options: KingfisherOptionsInfo)]()</div><div class="line">     var responseData = NSMutableData()</div><div class="line">     var downloadTaskCount = 0</div><div class="line">     var downloadTask: RetrieveImageDownloadTask?</div><div class="line"> &#125;</div></pre></td></tr></table></figure>
+<p><code>ImageFetchLoad</code> 是一个嵌套类。它处理了一个<code>URL</code> 下载数据，能够记录同一个<code>URL</code>下载任务次数。其中的<code>contents</code> 属性是一个元组数组，该元组包含两个部分：<code>CallbackPair</code> ，<code>KingfisherOptionsInfo</code> 。<code>KingfisherOptionsInfo</code> 就是传入的配置参数，而 <code>CallbackPair</code> 也是一个元组，它包含了传入的两个闭包。<code>ImageDownloaderProgressBlock</code> 能够在每次接收到数据时调用，可以用来显示进度条，<code>ImageDownloaderCompletionHandler</code> 在数据接收完成之后会被调用。里面还有一个<code>responseData</code> 属性,能够把每次获取到的数据存储起来。那么 <code>ImageDownloader</code> 这个类有什么作用呢？通常情况下，<code>ImageDownloader</code> 往往要处理多个 <code>URL</code> 的下载任务，它的 <code>fetchLoads</code> 属性是一个 <code>[URL: ImageFetchLoad]</code> 类型的字典，存储不同 <code>URL</code> 及其 <code>ImageFetchLoad</code> 之间的对应关系。<br> 下面是根据 <code>URL</code> 获取 <code>ImageFetchLoad</code> 的方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">func fetchLoad(for url: URL) -&gt; ImageFetchLoad? &#123;</div><div class="line">    var fetchLoad: ImageFetchLoad?</div><div class="line">    barrierQueue.sync &#123; fetchLoad = fetchLoads[url] &#125;</div><div class="line">    return fetchLoad</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这里使用 <code>barrierQueue</code> 来操作，利用 <code>sync</code> 阻塞当前线程，完成 <code>ImageFetchLoad</code> 读操作后再返回。这样当读取 <code>ImageFetchLoad</code> 的时候，保证ImageFetchLoad 不会同时在被写,导致数据错误</p>
+<h3 id="URLSession的配置"><a href="#URLSession的配置" class="headerlink" title="URLSession的配置"></a>URLSession的配置</h3><p>来看一下 <code>ImageDownloader</code> 的构造器方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">public init(name: String) &#123;</div><div class="line">        if name.isEmpty &#123;</div><div class="line">            fatalError(&quot;[Kingfisher] You should specify a name for the downloader. A downloader with empty name is not permitted.&quot;)</div><div class="line">        &#125;</div><div class="line">        </div><div class="line">        barrierQueue = DispatchQueue(label: &quot;com.onevcat.Kingfisher.ImageDownloader.Barrier.\\(name)&quot;, attributes: .concurrent)</div><div class="line">        processQueue = DispatchQueue(label: &quot;com.onevcat.Kingfisher.ImageDownloader.Process.\\(name)&quot;, attributes: .concurrent)</div><div class="line">   </div><div class="line">        sessionHandler = ImageDownloaderSessionHandler()</div><div class="line">        // Provide a default implement for challenge responder.</div><div class="line">        authenticationChallengeResponder = sessionHandler</div><div class="line">        session = URLSession(configuration: sessionConfiguration, delegate: sessionHandler, delegateQueue: .main)</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<p>可以看到 <code>session</code> 是 <code>sessionConfiguration</code> 和 <code>sessionHandler</code> 来配置的。其中<code>sessionConfiguration</code> 是个 <code>open</code> 的属性，可以在外部自定义。 <code>delegate</code> 确不是<code>ImageDownloader</code> 而是 <code>sessionHandler</code><br> 这里喵神也有解释，以前确实是 <code>ImageDownloader</code> 作为代理的，但会造成内存泄漏 <a href="https://github.com/onevcat/Kingfisher/issues/235" target="_blank" rel="external">issue</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">/// Delegate class for `NSURLSessionTaskDelegate`.</div><div class="line">/// The session object will hold its delegate until it gets invalidated.</div><div class="line">/// If we use `ImageDownloader` as the session delegate, it will not be released.</div><div class="line">/// So we need an additional handler to break the retain cycle.</div></pre></td></tr></table></figure>
+<h3 id="下载方法"><a href="#下载方法" class="headerlink" title="下载方法"></a>下载方法</h3><p>这是外部调用 <code>ImageDownloader</code> 最常用的方法 配置好请求参数：Time 、URL、 URLRequest ，确保请求的前提条件 主要是 <code>setup</code> 方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line">func downloadImage(with url: URL,</div><div class="line">              retrieveImageTask: RetrieveImageTask?,</div><div class="line">                        options: KingfisherOptionsInfo?,</div><div class="line">                  progressBlock: ImageDownloaderProgressBlock?,</div><div class="line">              completionHandler: ImageDownloaderCompletionHandler?) -&gt; RetrieveImageDownloadTask?</div><div class="line">    &#123;</div><div class="line">        if let retrieveImageTask = retrieveImageTask, retrieveImageTask.cancelledBeforeDownloadStarting &#123;</div><div class="line">            return nil</div><div class="line">        &#125;</div><div class="line">        </div><div class="line">        let timeout = self.downloadTimeout == 0.0 ? 15.0 : self.downloadTimeout</div><div class="line">        </div><div class="line">        // We need to set the URL as the load key. So before setup progress, we need to ask the `requestModifier` for a final URL.</div><div class="line">        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: timeout)</div><div class="line">        request.httpShouldUsePipelining = requestsUsePipeling</div><div class="line"></div><div class="line">        if let modifier = options?.modifier &#123;</div><div class="line">            guard let r = modifier.modified(for: request) else &#123;</div><div class="line">                completionHandler?(nil, NSError(domain: KingfisherErrorDomain, code: KingfisherError.downloadCancelledBeforeStarting.rawValue, userInfo: nil), nil, nil)</div><div class="line">                return nil</div><div class="line">            &#125;</div><div class="line">            request = r</div><div class="line">        &#125;</div><div class="line">        </div><div class="line">        // There is a possiblility that request modifier changed the url to `nil` or empty.</div><div class="line">        guard let url = request.url, !url.absoluteString.isEmpty else &#123;</div><div class="line">            completionHandler?(nil, NSError(domain: KingfisherErrorDomain, code: KingfisherError.invalidURL.rawValue, userInfo: nil), nil, nil)</div><div class="line">            return nil</div><div class="line">        &#125;</div><div class="line">        </div><div class="line">        var downloadTask: RetrieveImageDownloadTask?</div><div class="line">         setup &#123;...&#125;</div><div class="line">        return downloadTask</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<p> <code>setup</code> 闭包回调: 根据传过来的 <code>fetchLoad</code> 是否开启下载任务。若没有根据 <code>session</code> 生成 <code>dataTask</code> ,在进一步包装成 <code>RetrieveImageDownloadTask</code> ，传给 <code>fetchLoad</code> 的 <code>downloadTask</code> 属性 配置好任务优先级，开启下载任务，如果已开启下载，下载次数加1，设置传给外部的 <code>retrieveImageTask</code> 的 <code>downloadTask</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">setup(progressBlock: progressBlock, with: completionHandler, for: url, options: options) &#123;(session, fetchLoad) -&gt; Void in</div><div class="line">     if fetchLoad.downloadTask == nil &#123;</div><div class="line">         let dataTask = session.dataTask(with: request)</div><div class="line">         //设置下载任务</div><div class="line">         fetchLoad.downloadTask = RetrieveImageDownloadTask(internalTask: dataTask, ownerDownloader: self)</div><div class="line">         //设置下载任务优先级</div><div class="line">         dataTask.priority = options?.downloadPriority ?? URLSessionTask.defaultPriority</div><div class="line">          //开启下载任务</div><div class="line">         dataTask.resume()</div><div class="line">         </div><div class="line">         // Hold self while the task is executing.</div><div class="line">        //下载期间确保sessionHandler 持有 ImageDownloader</div><div class="line">         self.sessionHandler.downloadHolder = self</div><div class="line">     &#125;</div><div class="line">     //下载次数加1</div><div class="line">     fetchLoad.downloadTaskCount += 1</div><div class="line">     downloadTask = fetchLoad.downloadTask</div><div class="line">     retrieveImageTask?.downloadTask = downloadTask</div><div class="line"> &#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">// A single key may have multiple callbacks. Only download once.</div><div class="line"> func setup(progressBlock: ImageDownloaderProgressBlock?, with completionHandler: ImageDownloaderCompletionHandler?, for url: URL, options: KingfisherOptionsInfo?, started: ((URLSession, ImageFetchLoad) -&gt; Void)) &#123;</div><div class="line"></div><div class="line">     barrierQueue.sync(flags: .barrier) &#123;</div><div class="line">         let loadObjectForURL = fetchLoads[url] ?? ImageFetchLoad()</div><div class="line">         let callbackPair = (progressBlock: progressBlock, completionHandler: completionHandler)</div><div class="line">         </div><div class="line">         loadObjectForURL.contents.append((callbackPair, options ?? KingfisherEmptyOptionsInfo))</div><div class="line">         </div><div class="line">         fetchLoads[url] = loadObjectForURL</div><div class="line">         </div><div class="line">         if let session = session &#123;</div><div class="line">             started(session, loadObjectForURL)</div><div class="line">         &#125;</div><div class="line">     &#125;</div><div class="line"> &#125;</div></pre></td></tr></table></figure>
+<p>首先 <code>barrierQueue.sync</code> 确保 <code>ImageFetchLoad</code> 读写安全，根据传入的 <code>URL</code> 获取对应的<code>ImageFetchLoad</code> 设置 <code>callbackPair</code> 并更新 <code>contents</code> ，开启下载 </p>
+<h3 id="取消下载"><a href="#取消下载" class="headerlink" title="取消下载"></a>取消下载</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">func cancelDownloadingTask(_ task: RetrieveImageDownloadTask) &#123;</div><div class="line">      barrierQueue.sync &#123;</div><div class="line">          if let URL = task.internalTask.originalRequest?.url, let imageFetchLoad = self.fetchLoads[URL] &#123;</div><div class="line">              更新下载次数</div><div class="line">              imageFetchLoad.downloadTaskCount -= 1</div><div class="line">              if imageFetchLoad.downloadTaskCount == 0 &#123;</div><div class="line">                  task.internalTask.cancel()</div><div class="line">              &#125;</div><div class="line">          &#125;</div><div class="line">      &#125;</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+<h3 id="URLSession-代理方法"><a href="#URLSession-代理方法" class="headerlink" title="URLSession 代理方法"></a>URLSession 代理方法</h3><ul>
+<li>下载过程中接收Response</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -&gt; Void) &#123;</div><div class="line">       //下载过程中确保ImageDownloader 一直持有 </div><div class="line">       guard let downloader = downloadHolder else &#123;</div><div class="line">           completionHandler(.cancel)</div><div class="line">           return</div><div class="line">       &#125;</div><div class="line">        //返回状态码判断 </div><div class="line">       if let statusCode = (response as? HTTPURLResponse)?.statusCode,</div><div class="line">          let url = dataTask.originalRequest?.url,</div><div class="line">           !(downloader.delegate ?? downloader).isValidStatusCode(statusCode, for: downloader)</div><div class="line">       &#123;</div><div class="line">           let error = NSError(domain: KingfisherErrorDomain,</div><div class="line">                               code: KingfisherError.invalidStatusCode.rawValue,</div><div class="line">                               userInfo: [KingfisherErrorStatusCodeKey: statusCode, NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: statusCode)])</div><div class="line">            //返回错误 首先清除ImageFetchLoad </div><div class="line">           callCompletionHandlerFailure(error: error, url: url)</div><div class="line">       &#125;</div><div class="line">       //继续请求数据</div><div class="line">       completionHandler(.allow)</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>下载过程中接收到数据</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) &#123;</div><div class="line">    guard let downloader = downloadHolder else &#123;</div><div class="line">        return</div><div class="line">    &#125;</div><div class="line">    //添加数据到指定ImageFetchLoad</div><div class="line">    if let url = dataTask.originalRequest?.url, let fetchLoad = downloader.fetchLoad(for: url) &#123;</div><div class="line">        fetchLoad.responseData.append(data)</div><div class="line">        //下载进度回调</div><div class="line">        if let expectedLength = dataTask.response?.expectedContentLength &#123;</div><div class="line">            for content in fetchLoad.contents &#123;</div><div class="line">                DispatchQueue.main.async &#123;</div><div class="line">                    content.callback.progressBlock?(Int64(fetchLoad.responseData.length), expectedLength)</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>下载结束</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) &#123;</div><div class="line">    // URL 一致性判断</div><div class="line">    guard let url = task.originalRequest?.url else &#123;</div><div class="line">        return</div><div class="line">    &#125;</div><div class="line">    // error 判断</div><div class="line">    guard error == nil else &#123;</div><div class="line">        callCompletionHandlerFailure(error: error!, url: url)</div><div class="line">        return</div><div class="line">    &#125;</div><div class="line">    //图片处理</div><div class="line">    processImage(for: task, url: url)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>会话需要认证 </li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -&gt; Void) &#123;</div><div class="line">    guard let downloader = downloadHolder else &#123;</div><div class="line">        return</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    downloader.authenticationChallengeResponder?.downloader(downloader, didReceive: challenge, completionHandler: completionHandler)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>协议AuthenticationChallengeResponsable 处理会话认证 </li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">public protocol AuthenticationChallengeResponsable: class &#123;</div><div class="line">    /**</div><div class="line">     Called when an session level authentication challenge is received.</div><div class="line">     This method provide a chance to handle and response to the authentication challenge before downloading could start.</div><div class="line">     </div><div class="line">     - parameter downloader:        The downloader which receives this challenge.</div><div class="line">     - parameter challenge:         An object that contains the request for authentication.</div><div class="line">     - parameter completionHandler: A handler that your delegate method must call.</div><div class="line">     </div><div class="line">     - Note: This method is a forward from `URLSession(:didReceiveChallenge:completionHandler:)`. Please refer to the document of it in `NSURLSessionDelegate`.</div><div class="line">     */</div><div class="line">    func downloader(_ downloader: ImageDownloader, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -&gt; Void)</div><div class="line">&#125;</div><div class="line"></div><div class="line">extension AuthenticationChallengeResponsable &#123;</div><div class="line">    </div><div class="line">    func downloader(_ downloader: ImageDownloader, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -&gt; Void) &#123;</div><div class="line">    </div><div class="line">        if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust &#123;</div><div class="line">            if let trustedHosts = downloader.trustedHosts, trustedHosts.contains(challenge.protectionSpace.host) &#123;</div><div class="line">                let credential = URLCredential(trust: challenge.protectionSpace.serverTrust!)</div><div class="line">                completionHandler(.useCredential, credential)</div><div class="line">                return</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        </div><div class="line">        completionHandler(.performDefaultHandling, nil)</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>返回错误信息</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">private func callCompletionHandlerFailure(error: Error, url: URL) &#123;</div><div class="line">     guard let downloader = downloadHolder, let fetchLoad = downloader.fetchLoad(for: url) else &#123;</div><div class="line">         return</div><div class="line">     &#125;</div><div class="line">     </div><div class="line">     // We need to clean the fetch load first, before actually calling completion handler.</div><div class="line">        //清除ImageDownloader</div><div class="line">     cleanFetchLoad(for: url)</div><div class="line">  </div><div class="line">     for content in fetchLoad.contents &#123;</div><div class="line">         content.options.callbackDispatchQueue.safeAsync &#123;</div><div class="line">             content.callback.completionHandler?(nil, error as NSError, url, nil)</div><div class="line">         &#125;</div><div class="line">     &#125;</div><div class="line"> &#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>处理图片数据</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div></pre></td><td class="code"><pre><div class="line">private func processImage(for task: URLSessionTask, url: URL) &#123;</div><div class="line"></div><div class="line">    guard let downloader = downloadHolder else &#123;</div><div class="line">        return</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    // We are on main queue when receiving this.</div><div class="line">    downloader.processQueue.async &#123;</div><div class="line">        </div><div class="line">        guard let fetchLoad = downloader.fetchLoad(for: url) else &#123;</div><div class="line">            return</div><div class="line">        &#125;</div><div class="line">        //首先清除ImageDownloader</div><div class="line">        self.cleanFetchLoad(for: url)</div><div class="line">        </div><div class="line">        let data = fetchLoad.responseData as Data</div><div class="line">        </div><div class="line">        // Cache the processed images. So we do not need to re-process the image if using the same processor.</div><div class="line">        // Key is the identifier of processor.</div><div class="line">        var imageCache: [String: Image] = [:]</div><div class="line">        for content in fetchLoad.contents &#123;</div><div class="line">            </div><div class="line">            let options = content.options</div><div class="line">            let completionHandler = content.callback.completionHandler</div><div class="line">            let callbackQueue = options.callbackDispatchQueue</div><div class="line">            </div><div class="line">            let processor = options.processor</div><div class="line">            </div><div class="line">            var image = imageCache[processor.identifier]</div><div class="line">            if image == nil &#123;</div><div class="line">               //合成图片</div><div class="line">                image = processor.process(item: .data(data), options: options)</div><div class="line">                </div><div class="line">                // Add the processed image to cache. </div><div class="line">                // If `image` is nil, nothing will happen (since the key is not existing before).</div><div class="line">                imageCache[processor.identifier] = image</div><div class="line">            &#125;</div><div class="line">            </div><div class="line">            if let image = image &#123;</div><div class="line">                 </div><div class="line">                downloader.delegate?.imageDownloader(downloader, didDownload: image, for: url, with: task.response)</div><div class="line">                </div><div class="line">                if options.backgroundDecode &#123;</div><div class="line">                   //后台编码</div><div class="line">                    let decodedImage = image.kf.decoded(scale: options.scaleFactor)</div><div class="line">                    callbackQueue.safeAsync &#123; completionHandler?(decodedImage, nil, url, data) &#125;</div><div class="line">                &#125; else &#123;</div><div class="line">                    callbackQueue.safeAsync &#123; completionHandler?(image, nil, url, data) &#125;</div><div class="line">                &#125;</div><div class="line">                </div><div class="line">            &#125; else &#123;</div><div class="line">                 // 304 状态码 没有图像数据下载</div><div class="line">                if let res = task.response as? HTTPURLResponse , res.statusCode == 304 &#123;</div><div class="line">                    let notModified = NSError(domain: KingfisherErrorDomain, code: KingfisherError.notModified.rawValue, userInfo: nil)</div><div class="line">                    completionHandler?(nil, notModified, url, nil)</div><div class="line">                    continue</div><div class="line">                &#125;</div><div class="line">                 //返回不是图片数据 或者数据被破坏</div><div class="line">                let badData = NSError(domain: KingfisherErrorDomain, code: KingfisherError.badData.rawValue, userInfo: nil)</div><div class="line">                callbackQueue.safeAsync &#123; completionHandler?(nil, badData, url, nil) &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>Data-&gt;Image 方法</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">static func image(data: Data, scale: CGFloat, preloadAllGIFData: Bool) -&gt; Image? &#123;</div><div class="line">       var image: Image?</div><div class="line">       </div><div class="line">       #if os(macOS)</div><div class="line">           switch data.kf.imageFormat &#123;</div><div class="line">           case .JPEG: image = Image(data: data)</div><div class="line">           case .PNG: image = Image(data: data)</div><div class="line">           case .GIF: image = Kingfisher&lt;Image&gt;.animated(with: data, scale: scale, duration: 0.0, preloadAll: preloadAllGIFData)</div><div class="line">           case .unknown: image = Image(data: data)</div><div class="line">           &#125;</div><div class="line">       #else</div><div class="line">           switch data.kf.imageFormat &#123;</div><div class="line">           case .JPEG: image = Image(data: data, scale: scale)</div><div class="line">           case .PNG: image = Image(data: data, scale: scale)</div><div class="line">           case .GIF: image = Kingfisher&lt;Image&gt;.animated(with: data, scale: scale, duration: 0.0, preloadAll: preloadAllGIFData)</div><div class="line">           case .unknown: image = Image(data: data, scale: scale)</div><div class="line">           &#125;</div><div class="line">       #endif</div><div class="line">       </div><div class="line">       return image</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+<h3 id="下载某张特定图片"><a href="#下载某张特定图片" class="headerlink" title="下载某张特定图片"></a>下载某张特定图片</h3><p>在 <code>ImageDownloader</code> 中有一个 <code>delegate</code> 属性 <code>open weak var delegate:ImageDownloaderDelegate?</code><br>你可以创建一个 <code>ImageDownloader</code> ,设置好delegate，调用下面方法，并且实现代理方法，就能下载这张图片</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">open func downloadImage(with url: URL,</div><div class="line">                         options: KingfisherOptionsInfo? = nil,</div><div class="line">                         progressBlock: ImageDownloaderProgressBlock? = nil,</div><div class="line">                         completionHandler: ImageDownloaderCompletionHandler? = nil) -&gt; RetrieveImageDownloadTask?</div><div class="line"> &#123;</div><div class="line">     return downloadImage(with: url,</div><div class="line">                          retrieveImageTask: nil,</div><div class="line">                          options: options,</div><div class="line">                          progressBlock: progressBlock,</div><div class="line">                          completionHandler: completionHandler)</div><div class="line"> &#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line">/// Protocol of `ImageDownloader`.</div><div class="line">public protocol ImageDownloaderDelegate: class &#123;</div><div class="line">    /**</div><div class="line">    Called when the `ImageDownloader` object successfully downloaded an image from specified URL.</div><div class="line">    </div><div class="line">    - parameter downloader: The `ImageDownloader` object finishes the downloading.</div><div class="line">    - parameter image:      Downloaded image.</div><div class="line">    - parameter url:        URL of the original request URL.</div><div class="line">    - parameter response:   The response object of the downloading process.</div><div class="line">    */</div><div class="line">    func imageDownloader(_ downloader: ImageDownloader, didDownload image: Image, for url: URL, with response: URLResponse?)</div><div class="line">    </div><div class="line">    </div><div class="line">    /**</div><div class="line">    Check if a received HTTP status code is valid or not. </div><div class="line">    By default, a status code between 200 to 400 (excluded) is considered as valid.</div><div class="line">    If an invalid code is received, the downloader will raise an .invalidStatusCode error.</div><div class="line">    It has a `userInfo` which includes this statusCode and localizedString error message.</div><div class="line">     </div><div class="line">    - parameter code: The received HTTP status code.</div><div class="line">    - parameter downloader: The `ImageDownloader` object asking for validate status code.</div><div class="line">     </div><div class="line">    - returns: Whether this HTTP status code is valid or not.</div><div class="line">     </div><div class="line">    - Note: If the default 200 to 400 valid code does not suit your need, </div><div class="line">            you can implement this method to change that behavior.</div><div class="line">    */</div><div class="line">    func isValidStatusCode(_ code: Int, for downloader: ImageDownloader) -&gt; Bool</div><div class="line">&#125;</div><div class="line"></div><div class="line">extension ImageDownloaderDelegate &#123;</div><div class="line">    public func imageDownloader(_ downloader: ImageDownloader, didDownload image: Image, for url: URL, with response: URLResponse?) &#123;&#125;</div><div class="line">    </div><div class="line">    public func isValidStatusCode(_ code: Int, for downloader: ImageDownloader) -&gt; Bool &#123;</div><div class="line">        return (200..&lt;400).contains(code)</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>到这里为止，<code>ImageDownloader</code> 的大部分功能都已经提及,还有一些细节<br>结构体 <code>RetrieveImageDownloadTask</code> 是对 <code>URLSessionDataTask</code> 的进一层包装<br>有 <code>cancel</code> 方法供外部调用</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line">public struct RetrieveImageDownloadTask &#123;</div><div class="line">    let internalTask: URLSessionDataTask</div><div class="line">    </div><div class="line">    /// Downloader by which this task is intialized.</div><div class="line">    public private(set) weak var ownerDownloader: ImageDownloader?</div><div class="line"></div><div class="line">    /**</div><div class="line">     Cancel this download task. It will trigger the completion handler with an NSURLErrorCancelled error.</div><div class="line">     */</div><div class="line">    public func cancel() &#123;</div><div class="line">        ownerDownloader?.cancelDownloadingTask(self)</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    /// The original request URL of this download task.</div><div class="line">    public var url: URL? &#123;</div><div class="line">        return internalTask.originalRequest?.url</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    /// The relative priority of this download task. </div><div class="line">    /// It represents the `priority` property of the internal `NSURLSessionTask` of this download task.</div><div class="line">    /// The value for it is between 0.0~1.0. Default priority is value of 0.5.</div><div class="line">    /// See documentation on `priority` of `NSURLSessionTask` for more about it.</div><div class="line">    public var priority: Float &#123;</div><div class="line">        get &#123;</div><div class="line">            return internalTask.priority</div><div class="line">        &#125;</div><div class="line">        set &#123;</div><div class="line">            internalTask.priority = newValue</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="ImageCache"><a href="#ImageCache" class="headerlink" title="ImageCache"></a>ImageCache</h2><p>在 <code>Kingfisher</code> 中， <code>ImageCache</code> 能够进行内存缓存和磁盘缓存。内存缓存由 <code>NSCache</code> 实现，磁盘缓存采用将image 转化成data ,加上FileManager操作文件完成。下面是主要实现功能</p>
+<ul>
+<li>缓存路径管理</li>
+<li>缓存的添加与删除</li>
+<li>缓存的获取</li>
+<li>缓存的清除</li>
+<li>缓存状态检查</li>
+</ul>
+<p>下面是 <code>ImageCache</code> 内部的属性： </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div></pre></td><td class="code"><pre><div class="line">//Memory</div><div class="line">fileprivate let memoryCache = NSCache&lt;NSString, AnyObject&gt;()</div><div class="line"></div><div class="line">/// The largest cache cost of memory cache. The total cost is pixel count of </div><div class="line">/// all cached images in memory.</div><div class="line">/// Default is unlimited. Memory cache will be purged automatically when a </div><div class="line">/// memory warning notification is received.</div><div class="line">open var maxMemoryCost: UInt = 0 &#123;</div><div class="line">    didSet &#123;</div><div class="line">        self.memoryCache.totalCostLimit = Int(maxMemoryCost)</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">//Disk</div><div class="line">fileprivate let ioQueue: DispatchQueue</div><div class="line">fileprivate var fileManager: FileManager!</div><div class="line"></div><div class="line">///The disk cache location.</div><div class="line">open let diskCachePath: String</div><div class="line">  </div><div class="line">/// The default file extension appended to cached files.</div><div class="line">open var pathExtension: String?</div><div class="line"></div><div class="line">/// The longest time duration in second of the cache being stored in disk. </div><div class="line">/// Default is 1 week (60 * 60 * 24 * 7 seconds).</div><div class="line">open var maxCachePeriodInSecond: TimeInterval = 60 * 60 * 24 * 7 //Cache exists for 1 week</div><div class="line"></div><div class="line">/// The largest disk size can be taken for the cache. It is the total </div><div class="line">/// allocated size of cached files in bytes.</div><div class="line">/// Default is no limit.</div><div class="line">open var maxDiskCacheSize: UInt = 0</div><div class="line"></div><div class="line">fileprivate let processQueue: DispatchQueue</div><div class="line"></div><div class="line">/// The default cache.</div><div class="line">public static let `default` = ImageCache(name: &quot;default&quot;)</div><div class="line"></div><div class="line">/// Closure that defines the disk cache path from a given path and cacheName.</div><div class="line">public typealias DiskCachePathClosure = (String?, String) -&gt; String</div><div class="line"></div><div class="line">/// The default DiskCachePathClosure</div><div class="line">public final class func defaultDiskCachePathClosure(path: String?, cacheName: String) -&gt; String &#123;</div><div class="line">    let dstPath = path ?? NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first!</div><div class="line">    return (dstPath as NSString).appendingPathComponent(cacheName)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>其中: <code>memoryCache</code> 用来管理内存缓存，<code>ioQueue</code> 用来进行硬盘队列操作。由于硬盘存取操作相比于内存存取耗时，避免造成线程阻塞需单独开辟线程进行相应操作。<code>fileManager</code> 用于文件管理。 <code>diskCachePath</code> 用于设置文件的存储路径。 <code>maxCachePeriodInSecond</code> ,最大的磁盘缓存时间，默认一周 <code>maxDiskCacheSize</code> 最大的磁盘缓存大小。 <code>processQueue</code> 用于执行图片的 <code>decode</code> 操作。<code>default</code> 为  <code>ImageCache</code> 类的单例，在Swift 中，调用 <code>static let</code> 可以直接创建一个单例，系统会自动调用 <code>dispatch_once</code>。</p>
+<h3 id="缓存路径相关的几个方法"><a href="#缓存路径相关的几个方法" class="headerlink" title="缓存路径相关的几个方法"></a>缓存路径相关的几个方法</h3><ul>
+<li>根据key,serializer, options获取磁盘图片</li>
+<li>根据key获取磁盘图片数据</li>
+<li>根据key 获取md5加密字符串</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">extension ImageCache &#123;</div><div class="line">  </div><div class="line">    func diskImage(forComputedKey key: String, serializer: CacheSerializer, options: KingfisherOptionsInfo) -&gt; Image? &#123;</div><div class="line">        if let data = diskImageData(forComputedKey: key) &#123;</div><div class="line">            return serializer.image(with: data, options: options)</div><div class="line">        &#125; else &#123;</div><div class="line">            return nil</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    func diskImageData(forComputedKey key: String) -&gt; Data? &#123;</div><div class="line">        let filePath = cachePath(forComputedKey: key)</div><div class="line">        return (try? Data(contentsOf: URL(fileURLWithPath: filePath)))</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    func cacheFileName(forComputedKey key: String) -&gt; String &#123;</div><div class="line">        if let ext = self.pathExtension &#123;</div><div class="line">          return (key.kf.md5 as NSString).appendingPathExtension(ext)!</div><div class="line">        &#125;</div><div class="line">        return key.kf.md5</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="缓存的添加与删除"><a href="#缓存的添加与删除" class="headerlink" title="缓存的添加与删除"></a>缓存的添加与删除</h3><p>主要外部调用方法 <code>store</code> ,首先对传入的 URL Key 和 processorIdentifier 做简单拼接成computedKey，设置内存缓存。然后根据是否磁盘缓存 进一步处理，其中调用 <code>CacheSerializer</code> 的  <code>func data(with image: Image, original: Data?) -&gt; Data?</code> 方法,根据Data 获取图片类型，将image序列化成data 存入文件，其中path 是computedKey经过md5加密获得</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div></pre></td><td class="code"><pre><div class="line">open func store(_ image: Image,</div><div class="line">                    original: Data? = nil,</div><div class="line">                    forKey key: String,</div><div class="line">                    processorIdentifier identifier: String = &quot;&quot;,</div><div class="line">                    cacheSerializer serializer: CacheSerializer = DefaultCacheSerializer.default,</div><div class="line">                    toDisk: Bool = true,</div><div class="line">                    completionHandler: (() -&gt; Void)? = nil)</div><div class="line">  &#123;</div><div class="line">      //内存缓存</div><div class="line">      let computedKey = key.computedKey(with: identifier)</div><div class="line">      memoryCache.setObject(image, forKey: computedKey as NSString, cost: image.kf.imageCost)</div><div class="line"></div><div class="line">      func callHandlerInMainQueue() &#123;</div><div class="line">          if let handler = completionHandler &#123;</div><div class="line">              DispatchQueue.main.async &#123;</div><div class="line">                  handler()</div><div class="line">              &#125;</div><div class="line">          &#125;</div><div class="line">      &#125;</div><div class="line">      </div><div class="line">      if toDisk &#123;</div><div class="line">         需要磁盘缓存</div><div class="line">          ioQueue.async &#123;</div><div class="line">              将image 序列化成 data</div><div class="line">              if let data = serializer.data(with: image, original: original) &#123;</div><div class="line">                  if !self.fileManager.fileExists(atPath: self.diskCachePath) &#123;</div><div class="line">                      do &#123;</div><div class="line">                          不存在磁盘缓存文件夹 创建 默认在 Library/Cache/com.onevcat.Kingfisher.ImageCache.default</div><div class="line">                          try self.fileManager.createDirectory(atPath: self.diskCachePath, withIntermediateDirectories: true, attributes: nil)</div><div class="line">                      &#125; catch _ &#123;&#125;</div><div class="line">                  &#125;</div><div class="line">                  磁盘缓存</div><div class="line">                  self.fileManager.createFile(atPath: self.cachePath(forComputedKey: computedKey), contents: data, attributes: nil)</div><div class="line">              &#125;</div><div class="line">              callHandlerInMainQueue()</div><div class="line">          &#125;</div><div class="line">      &#125; else &#123;</div><div class="line">          callHandlerInMainQueue()</div><div class="line">      &#125;</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>根据存入的key值移除缓存图片，如果需要移除磁盘缓存，删除对应文件</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">open func removeImage(forKey key: String,</div><div class="line">                        processorIdentifier identifier: String = &quot;&quot;,</div><div class="line">                        fromDisk: Bool = true,</div><div class="line">                        completionHandler: (() -&gt; Void)? = nil)</div><div class="line">  &#123;</div><div class="line">      根据key移除内存缓存</div><div class="line">      let computedKey = key.computedKey(with: identifier)</div><div class="line">      memoryCache.removeObject(forKey: computedKey as NSString)</div><div class="line">      </div><div class="line">      func callHandlerInMainQueue() &#123;</div><div class="line">          if let handler = completionHandler &#123;</div><div class="line">              DispatchQueue.main.async &#123;</div><div class="line">                  handler()</div><div class="line">              &#125;</div><div class="line">          &#125;</div><div class="line">      &#125;</div><div class="line">      </div><div class="line">      if fromDisk &#123;</div><div class="line">          ioQueue.async&#123;</div><div class="line">              do &#123;</div><div class="line">                  根据key移除磁盘缓存</div><div class="line">                  try self.fileManager.removeItem(atPath: self.cachePath(forComputedKey: computedKey))</div><div class="line">              &#125; catch _ &#123;&#125;</div><div class="line">              callHandlerInMainQueue()</div><div class="line">          &#125;</div><div class="line">      &#125; else &#123;</div><div class="line">          callHandlerInMainQueue()</div><div class="line">      &#125;</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+<h3 id="缓存的获取"><a href="#缓存的获取" class="headerlink" title="缓存的获取"></a>缓存的获取</h3><p>根据 <code>key</code> 获得缓存图片 首先从内存缓存中获取，如果无内存缓存，再判断磁盘缓存。如果有，从磁盘中获取缓存文件，将图片 <code>data</code> 反序列化成 <code>image</code> ，在返回之前判断了是否需要后台编码，做了内存缓存。这里返回的<code>RetrieveImageDiskTask</code> 是一个 <code>DispatchWorkItem</code> ,相当于OC的 <code>dispatch_block_t</code> ，它定义了获取磁盘缓存并进行内存缓存的操作闭包，放在ioQueue中异步执行，确保了外部在操作过程中一直持有该缓存操作，相当于 <code>ImageDownloader</code> 的 <code>RetrieveImageDownloadTask</code> ,并且在返回之前都将sSelf置为nil，释放了内存。因为该闭包属于逃逸闭包，必需在闭包中显式地引用self 。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div></pre></td><td class="code"><pre><div class="line">open func retrieveImage(forKey key: String,</div><div class="line">                              options: KingfisherOptionsInfo?,</div><div class="line">                    completionHandler: ((Image?, CacheType) -&gt; ())?) -&gt; RetrieveImageDiskTask?</div><div class="line">   &#123;</div><div class="line">       // No completion handler. Not start working and early return.</div><div class="line">       guard let completionHandler = completionHandler else &#123;</div><div class="line">           return nil</div><div class="line">       &#125;</div><div class="line">       </div><div class="line">       var block: RetrieveImageDiskTask?</div><div class="line">       let options = options ?? KingfisherEmptyOptionsInfo</div><div class="line">       首先判断内存缓存是否存在</div><div class="line">       if let image = self.retrieveImageInMemoryCache(forKey: key, options: options) &#123;</div><div class="line">           options.callbackDispatchQueue.safeAsync &#123;</div><div class="line">               completionHandler(image, .memory)</div><div class="line">           &#125;</div><div class="line">       &#125; else &#123;</div><div class="line">           var sSelf: ImageCache! = self</div><div class="line">           block = DispatchWorkItem(block: &#123;</div><div class="line">               // Begin to load image from disk</div><div class="line">               if let image = sSelf.retrieveImageInDiskCache(forKey: key, options: options) &#123;</div><div class="line">                   if options.backgroundDecode &#123;</div><div class="line">                       sSelf.processQueue.async &#123;</div><div class="line">                           let result = image.kf.decoded(scale: options.scaleFactor)</div><div class="line">                           内存缓存</div><div class="line">                           sSelf.store(result,</div><div class="line">                                       forKey: key,</div><div class="line">                                       processorIdentifier: options.processor.identifier,</div><div class="line">                                       cacheSerializer: options.cacheSerializer,</div><div class="line">                                       toDisk: false,</div><div class="line">                                       completionHandler: nil)</div><div class="line">                           </div><div class="line">                           options.callbackDispatchQueue.safeAsync &#123;</div><div class="line">                               completionHandler(result, .memory)</div><div class="line">                               sSelf = nil</div><div class="line">                           &#125;</div><div class="line">                       &#125;</div><div class="line">                   &#125; else &#123;</div><div class="line">                       内存缓存</div><div class="line">                       sSelf.store(image,</div><div class="line">                                   forKey: key,</div><div class="line">                                   processorIdentifier: options.processor.identifier,</div><div class="line">                                   cacheSerializer: options.cacheSerializer,</div><div class="line">                                   toDisk: false,</div><div class="line">                                   completionHandler: nil</div><div class="line">                       )</div><div class="line">                       options.callbackDispatchQueue.safeAsync &#123;</div><div class="line">                           completionHandler(image, .disk)</div><div class="line">                           sSelf = nil</div><div class="line">                       &#125;</div><div class="line">                   &#125;</div><div class="line">               &#125; else &#123;</div><div class="line">                   // No image found from either memory or disk</div><div class="line">                   没有磁盘缓存</div><div class="line">                   options.callbackDispatchQueue.safeAsync &#123;</div><div class="line">                       completionHandler(nil, .none)</div><div class="line">                       sSelf = nil</div><div class="line">                   &#125;</div><div class="line">               &#125;</div><div class="line">           &#125;)</div><div class="line">           </div><div class="line">           sSelf.ioQueue.async(execute: block!)</div><div class="line">       &#125;</div><div class="line">   </div><div class="line">       return block</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>从内存中获取图片</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">open func retrieveImageInMemoryCache(forKey key: String, options: KingfisherOptionsInfo? = nil) -&gt; Image? &#123;</div><div class="line">    let options = options ?? KingfisherEmptyOptionsInfo</div><div class="line">    let computedKey = key.computedKey(with: options.processor.identifier)</div><div class="line">    </div><div class="line">    return memoryCache.object(forKey: computedKey as NSString) as? Image</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>从磁盘中获取图片</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">open func retrieveImageInDiskCache(forKey key: String, options: KingfisherOptionsInfo? = nil) -&gt; Image? &#123;</div><div class="line">    </div><div class="line">    let options = options ?? KingfisherEmptyOptionsInfo</div><div class="line">    let computedKey = key.computedKey(with: options.processor.identifier)</div><div class="line">    </div><div class="line">    return diskImage(forComputedKey: computedKey, serializer: options.cacheSerializer, options: options)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="缓存的清除"><a href="#缓存的清除" class="headerlink" title="缓存的清除"></a>缓存的清除</h3><ul>
+<li>手动清除所有内存缓存和磁盘缓存</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">@objc public func clearMemoryCache() &#123;</div><div class="line">    memoryCache.removeAllObjects()</div><div class="line"></div><div class="line">/**</div><div class="line">Clear disk cache. This is an async operation.</div><div class="line"></div><div class="line">- parameter completionHander: Called after the operation completes.</div><div class="line">*/</div><div class="line">open func clearDiskCache(completion handler: (()-&gt;())? = nil) &#123;</div><div class="line">    ioQueue.async &#123;</div><div class="line">        do &#123;</div><div class="line">            try self.fileManager.removeItem(atPath: self.diskCachePath)</div><div class="line">            try self.fileManager.createDirectory(atPath: self.diskCachePath, withIntermediateDirectories: true, attributes: nil)</div><div class="line">        &#125; catch _ &#123; &#125;</div><div class="line">        </div><div class="line">        if let handler = handler &#123;</div><div class="line">            DispatchQueue.main.async &#123;</div><div class="line">                handler()</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>当应用程序在进入后台的时候，可以自动检测过期缓存文件，并在后台完成清理操作，实现代码如下：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">@objc public func backgroundCleanExpiredDiskCache() &#123;</div><div class="line">    // if &apos;sharedApplication()&apos; is unavailable, then return</div><div class="line">    guard let sharedApplication = Kingfisher&lt;UIApplication&gt;.shared else &#123; return &#125;</div><div class="line"></div><div class="line">    func endBackgroundTask(_ task: inout UIBackgroundTaskIdentifier) &#123;</div><div class="line">        sharedApplication.endBackgroundTask(task)</div><div class="line">        task = UIBackgroundTaskInvalid</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    var backgroundTask: UIBackgroundTaskIdentifier!</div><div class="line">    backgroundTask = sharedApplication.beginBackgroundTask &#123;</div><div class="line">        endBackgroundTask(&amp;backgroundTask!)</div><div class="line">    &#125;</div><div class="line">    //清除过期的磁盘缓存</div><div class="line">    cleanExpiredDiskCache &#123;</div><div class="line">        endBackgroundTask(&amp;backgroundTask!)</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p> 获取过期的 <code>URL</code> 数组，磁盘缓存大小和缓存文件字典, 进行缓存删除操作。 通过 <code>FileManager</code> 的 <code>enumerator</code> 方法遍历出所有缓存文件，如果文件最后一次访问日期比当前时间减去一周时间还要早，将该文件<code>fileUrl</code> 添加到 <code>urlsToDelete</code> 数组。计算缓存文件大小，以 <code>fileUrl</code> 为 <code>key</code> ， <code>resourceValues</code> 为 <code>value</code> ,存入 <code>cachedFiles</code>  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div></pre></td><td class="code"><pre><div class="line">fileprivate func travelCachedFiles(onlyForCacheSize: Bool) -&gt; (urlsToDelete: [URL],diskCacheSize: UInt, cachedFiles: [URL: URLResourceValues]) &#123;</div><div class="line">       </div><div class="line">       let diskCacheURL = URL(fileURLWithPath: diskCachePath)</div><div class="line">       let resourceKeys: Set&lt;URLResourceKey&gt; = [.isDirectoryKey, .contentAccessDateKey, .totalFileAllocatedSizeKey]</div><div class="line">       //过期日期</div><div class="line">       let expiredDate = Date(timeIntervalSinceNow: -maxCachePeriodInSecond)</div><div class="line">       // 缓存字典 URL : ResourceValue</div><div class="line">       var cachedFiles = [URL: URLResourceValues]()</div><div class="line">       var urlsToDelete = [URL]()</div><div class="line">       var diskCacheSize: UInt = 0</div><div class="line">       </div><div class="line">       if let fileEnumerator = self.fileManager.enumerator(at: diskCacheURL, includingPropertiesForKeys: Array(resourceKeys), options: FileManager.DirectoryEnumerationOptions.skipsHiddenFiles, errorHandler: nil),</div><div class="line">          let urls = fileEnumerator.allObjects as? [URL]</div><div class="line">       &#123;</div><div class="line">           for fileUrl in urls &#123;</div><div class="line">               </div><div class="line">               do &#123;</div><div class="line">                   let resourceValues = try fileUrl.resourceValues(forKeys: resourceKeys)</div><div class="line">                   // If it is a Directory. Continue to next file URL.</div><div class="line">                   if resourceValues.isDirectory == true &#123;</div><div class="line">                       continue</div><div class="line">                   &#125;</div><div class="line">                   </div><div class="line">                   if !onlyForCacheSize &#123;</div><div class="line">                       // If this file is expired, add it to URLsToDelete</div><div class="line">                       if let lastAccessData = resourceValues.contentAccessDate &#123;</div><div class="line">                           if (lastAccessData as NSDate).laterDate(expiredDate) == expiredDate &#123;</div><div class="line">                               //添加过期URL到删除数组</div><div class="line">                               urlsToDelete.append(fileUrl)</div><div class="line">                               continue</div><div class="line">                           &#125;</div><div class="line">                       &#125;</div><div class="line">                   &#125;</div><div class="line"></div><div class="line">                   if let fileSize = resourceValues.totalFileAllocatedSize &#123;</div><div class="line">                       //更新缓存大小</div><div class="line">                       diskCacheSize += UInt(fileSize)</div><div class="line">                       if !onlyForCacheSize &#123;</div><div class="line">                           // 缓存文件字典对应</div><div class="line">                           cachedFiles[fileUrl] = resourceValues</div><div class="line">                       &#125;</div><div class="line">                   &#125;</div><div class="line">               &#125; catch _ &#123; &#125;</div><div class="line">           &#125;</div><div class="line">       &#125;</div><div class="line">       </div><div class="line">       return (urlsToDelete, diskCacheSize, cachedFiles)</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+<p>根据上面获取的 <code>urlsToDelete</code> 数组， <code>diskCacheSize</code> 磁盘缓存大小和 <code>cachedFiles</code> 字典，删除过期缓存 </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div></pre></td><td class="code"><pre><div class="line">open func cleanExpiredDiskCache(completion handler: (()-&gt;())? = nil) &#123;</div><div class="line">      </div><div class="line">      // Do things in cocurrent io queue</div><div class="line">      ioQueue.async &#123;</div><div class="line">          </div><div class="line">          var (URLsToDelete, diskCacheSize, cachedFiles) = self.travelCachedFiles(onlyForCacheSize: false)</div><div class="line">          //清除过期的磁盘缓存 根据资源最后一次访问的时间和 当前时间减去一周时间（自定义最长缓存存在时间）比较判断是否过期</div><div class="line">          for fileURL in URLsToDelete &#123;</div><div class="line">              do &#123;</div><div class="line">                  try self.fileManager.removeItem(at: fileURL)</div><div class="line">              &#125; catch _ &#123; &#125;</div><div class="line">          &#125;</div><div class="line">          //磁盘缓存大小超过自定义最大缓存</div><div class="line">          if self.maxDiskCacheSize &gt; 0 &amp;&amp; diskCacheSize &gt; self.maxDiskCacheSize &#123;</div><div class="line">              //计划清除到最大缓存的一半</div><div class="line">              let targetSize = self.maxDiskCacheSize / 2</div><div class="line">                  </div><div class="line">              // Sort files by last modify date. We want to clean from the oldest files.</div><div class="line">              //清除访问次数少的文件</div><div class="line">              let sortedFiles = cachedFiles.keysSortedByValue &#123;</div><div class="line">                  resourceValue1, resourceValue2 -&gt; Bool in</div><div class="line">                  </div><div class="line">                  if let date1 = resourceValue1.contentAccessDate,</div><div class="line">                     let date2 = resourceValue2.contentAccessDate</div><div class="line">                  &#123;</div><div class="line">                      return date1.compare(date2) == .orderedAscending</div><div class="line">                  &#125;</div><div class="line">                  </div><div class="line">                  // Not valid date information. This should not happen. Just in case.</div><div class="line">                  return true</div><div class="line">              &#125;</div><div class="line">              </div><div class="line">              for fileURL in sortedFiles &#123;</div><div class="line">                  </div><div class="line">                  do &#123;</div><div class="line">                      try self.fileManager.removeItem(at: fileURL)</div><div class="line">                  &#125; catch &#123; &#125;</div><div class="line">                      </div><div class="line">                  URLsToDelete.append(fileURL)</div><div class="line">                  </div><div class="line">                  if let fileSize = cachedFiles[fileURL]?.totalFileAllocatedSize &#123;</div><div class="line">                      diskCacheSize -= UInt(fileSize)</div><div class="line">                  &#125;</div><div class="line">                  //达到指定目标 返回</div><div class="line">                  if diskCacheSize &lt; targetSize &#123;</div><div class="line">                      break</div><div class="line">                  &#125;</div><div class="line">              &#125;</div><div class="line">          &#125;</div><div class="line">              </div><div class="line">          DispatchQueue.main.async &#123;</div><div class="line">              </div><div class="line">              if URLsToDelete.count != 0 &#123;</div><div class="line">                  let cleanedHashes = URLsToDelete.map &#123; $0.lastPathComponent &#125;</div><div class="line">                  NotificationCenter.default.post(name: .KingfisherDidCleanDiskCache, object: self, userInfo: [KingfisherDiskCacheCleanedHashKey: cleanedHashes])</div><div class="line">              &#125;</div><div class="line">              </div><div class="line">              handler?()</div><div class="line">          &#125;</div><div class="line">      &#125;</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+<h3 id="缓存的状态检查"><a href="#缓存的状态检查" class="headerlink" title="缓存的状态检查"></a>缓存的状态检查</h3><ul>
+<li>缓存类型结构体</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">public struct CacheCheckResult &#123;</div><div class="line">      public let cached: Bool</div><div class="line">      public let cacheType: CacheType?</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>根据key判断是否存在缓存以及缓存图片类型</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">open func isImageCached(forKey key: String, processorIdentifier identifier: String = &quot;&quot;) -&gt; CacheCheckResult &#123;</div><div class="line">    </div><div class="line">    let computedKey = key.computedKey(with: identifier)</div><div class="line">    </div><div class="line">    if memoryCache.object(forKey: computedKey as NSString) != nil &#123;</div><div class="line">        return CacheCheckResult(cached: true, cacheType: .memory)</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    let filePath = cachePath(forComputedKey: computedKey)</div><div class="line">    </div><div class="line">    var diskCached = false</div><div class="line">    ioQueue.sync &#123;</div><div class="line">        diskCached = fileManager.fileExists(atPath: filePath)</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    if diskCached &#123;</div><div class="line">        return CacheCheckResult(cached: true, cacheType: .disk)</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    return CacheCheckResult(cached: false, cacheType: nil)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>根据key，processorIdentifier查找缓存文件</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line">Get the hash for the key. This could be used for matching files.</div><div class="line"></div><div class="line">- parameter key:        The key which is used for caching.</div><div class="line">- parameter identifier: The identifier of processor used. If you are using a processor for the image, pass the identifier of processor to it.</div><div class="line"></div><div class="line"> - returns: Corresponding hash.</div><div class="line">*/</div><div class="line">open func hash(forKey key: String, processorIdentifier identifier: String = &quot;&quot;) -&gt; String &#123;</div><div class="line">    let computedKey = key.computedKey(with: identifier)</div><div class="line">    return cacheFileName(forComputedKey: computedKey)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>计算缓存大小</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line">Calculate the disk size taken by cache. </div><div class="line">It is the total allocated size of the cached files in bytes.</div><div class="line"></div><div class="line">- parameter completionHandler: Called with the calculated size when finishes.</div><div class="line">*/</div><div class="line">open func calculateDiskCacheSize(completion handler: @escaping ((_ size: UInt) -&gt; ())) &#123;</div><div class="line">    ioQueue.async &#123;</div><div class="line">        let (_, diskCacheSize, _) = self.travelCachedFiles(onlyForCacheSize: true)</div><div class="line">        DispatchQueue.main.async &#123;</div><div class="line">            handler(diskCacheSize)</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>根据key，identifier获取加密后的缓存路径</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line">Get the cache path for the key.</div><div class="line">It is useful for projects with UIWebView or anyone that needs access to the local file path.</div><div class="line">  </div><div class="line">- Note: This method does not guarantee there is an image already cached in the path. It just returns the path</div><div class="line">  that the image should be.</div><div class="line">  You could use `isImageCached(forKey:)` method to check whether the image is cached under that key.</div><div class="line">*/</div><div class="line">open func cachePath(forKey key: String, processorIdentifier identifier: String = &quot;&quot;) -&gt; String &#123;</div><div class="line">    let computedKey = key.computedKey(with: identifier)</div><div class="line">    return cachePath(forComputedKey: computedKey)</div><div class="line">&#125;</div><div class="line">open func cachePath(forComputedKey key: String) -&gt; String &#123;</div><div class="line">    let fileName = cacheFileName(forComputedKey: key)</div><div class="line">    return (diskCachePath as NSString).appendingPathComponent(fileName)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="CacheSerializer"><a href="#CacheSerializer" class="headerlink" title="CacheSerializer"></a>CacheSerializer</h3><p>该类用于将磁盘图片数据反序列化成图片对象以及将图片对象序列化成图片数据。具体功能由 <code>Image</code> 文件实现<br> <code>Image</code> 序列化 <code>Data</code> 。通过 <code>Data</code> 获取图片 <code>format</code> ,返回不同格式下图片。能实现 <code>PNG</code> ，<code>JPEG</code> ，<code>GIF</code> 图片格式，其他图片格式默认返回 <code>PNG</code> 格式</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">public func data(with image: Image, original: Data?) -&gt; Data? &#123;</div><div class="line">       let imageFormat = original?.kf.imageFormat ?? .unknown</div><div class="line">       </div><div class="line">       let data: Data?</div><div class="line">       switch imageFormat &#123;</div><div class="line">       case .PNG: data = image.kf.pngRepresentation()</div><div class="line">       case .JPEG: data = image.kf.jpegRepresentation(compressionQuality: 1.0)</div><div class="line">       case .GIF: data = image.kf.gifRepresentation()</div><div class="line">       case .unknown: data = original ?? image.kf.normalized.kf.pngRepresentation()</div><div class="line">       &#125;</div><div class="line">       </div><div class="line">       return data</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+<p><code>Data</code> 序列化成 <code>Image</code>。 如果是 <code>GIF</code> 图片， <code>preloadAllGIFData</code> 用于判断图片显示方式。 false： 不会加载所有 <code>GIF</code> 图片数据，只显示 <code>GIF</code> 中的第一张图片，true：将所有图片数据加载到内存，显示 <code>GIF</code>动态图片 </p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">public func image(with data: Data, options: KingfisherOptionsInfo?) -&gt; Image? &#123;</div><div class="line">        let scale = (options ?? KingfisherEmptyOptionsInfo).scaleFactor</div><div class="line">        let preloadAllGIFData = (options ?? KingfisherEmptyOptionsInfo).preloadAllGIFData</div><div class="line">        </div><div class="line">        return Kingfisher&lt;Image&gt;.image(data: data, scale: scale, preloadAllGIFData: preloadAllGIFData)</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2016/12/26/Kingfisher2/">Kingfisher 3.x 学习（二）</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">Chen Ao</a></p>
+        <p><span>发布时间:</span>2016-12-26, 20:39:39</p>
+        <p><span>最后更新:</span>2016-12-28, 17:55:38</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2016/12/26/Kingfisher2/" title="Kingfisher 3.x 学习（二）">http://ChenAo0727.github.io/2016/12/26/Kingfisher2/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://ChenAo0727.github.io/2016/12/26/Kingfisher2/　　作者: Chen Ao" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2016/12/26/Kingfisher/">
+                    Kingfisher 3.x 学习（一）
+                </a>
+            </div>
+        
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#ImageDownloader"><span class="toc-number">1.</span> <span class="toc-text">ImageDownloader</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#ImageFetchLoad"><span class="toc-number">1.1.</span> <span class="toc-text">ImageFetchLoad</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#URLSession的配置"><span class="toc-number">1.2.</span> <span class="toc-text">URLSession的配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#下载方法"><span class="toc-number">1.3.</span> <span class="toc-text">下载方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#取消下载"><span class="toc-number">1.4.</span> <span class="toc-text">取消下载</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#URLSession-代理方法"><span class="toc-number">1.5.</span> <span class="toc-text">URLSession 代理方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#下载某张特定图片"><span class="toc-number">1.6.</span> <span class="toc-text">下载某张特定图片</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ImageCache"><span class="toc-number">2.</span> <span class="toc-text">ImageCache</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#缓存路径相关的几个方法"><span class="toc-number">2.1.</span> <span class="toc-text">缓存路径相关的几个方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#缓存的添加与删除"><span class="toc-number">2.2.</span> <span class="toc-text">缓存的添加与删除</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#缓存的获取"><span class="toc-number">2.3.</span> <span class="toc-text">缓存的获取</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#缓存的清除"><span class="toc-number">2.4.</span> <span class="toc-text">缓存的清除</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#缓存的状态检查"><span class="toc-number">2.5.</span> <span class="toc-text">缓存的状态检查</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CacheSerializer"><span class="toc-number">2.6.</span> <span class="toc-text">CacheSerializer</span></a></li></ol></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"Kingfisher 3.x 学习（二）　| 夜空中最亮的星　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+      <div class="duoshuo" id="comments">
+    <div id="comment-box" ></div>
+    <div class="ds-thread" id="ds-thread" data-thread-key="2016/12/26/Kingfisher2/" data-title="Kingfisher 3.x 学习（二）" data-url="http://ChenAo0727.github.io/2016/12/26/Kingfisher2/"></div>
+    <script>
+        var duoshuoQuery = {short_name:"chenao0727github"};
+        var loadComment = function(){
+            var d = document, s = d.createElement('script');
+            s.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+            s.async = true; s.charset = 'UTF-8';
+            (d.head || d.body).appendChild(s);
+        }
+
+        
+    </script>
+    
+    <script> loadComment(); </script>
+
+</div>
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2016/12/26/Kingfisher/" title="上一篇: Kingfisher 3.x 学习（一）">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/" title="回到主页"><i class="fa fa-home"></i></a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2016/12/28/hexo/">Hexo + Github-Pages 从零开始搭建个人博客</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/27/Swift-closure/">Swift 闭包</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/26/Kingfisher/">Kingfisher 3.x 学习（一）</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/26/Kingfisher2/">Kingfisher 3.x 学习（二）</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2016 Chen Ao
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 5;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>

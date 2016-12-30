@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="Chen Ao" />
+
+
+
+<meta name="description" content="Swift 中的闭包是自包含的函数代码块，可以在代码中被传递和使用。类似于OC中的Block以及其他函数的匿名函数。闭包可以捕获和存储其所在上下文中任意常量和变量的引用，被称为包裹常量和变量。Swift可以为你管理在捕获过程中涉及到的所有内存操作">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Swift 闭包">
+<meta property="og:url" content="http://ChenAo0727.github.io/2016/12/27/Swift-closure/index.html">
+<meta property="og:site_name" content="夜空中最亮的星">
+<meta property="og:description" content="Swift 中的闭包是自包含的函数代码块，可以在代码中被传递和使用。类似于OC中的Block以及其他函数的匿名函数。闭包可以捕获和存储其所在上下文中任意常量和变量的引用，被称为包裹常量和变量。Swift可以为你管理在捕获过程中涉及到的所有内存操作">
+<meta property="og:updated_time" content="2016-12-27T09:21:15.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Swift 闭包">
+<meta name="twitter:description" content="Swift 中的闭包是自包含的函数代码块，可以在代码中被传递和使用。类似于OC中的Block以及其他函数的匿名函数。闭包可以捕获和存储其所在上下文中任意常量和变量的引用，被称为包裹常量和变量。Swift可以为你管理在捕获过程中涉及到的所有内存操作">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="夜空中最亮的星" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/favicon.png">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>Swift 闭包 | 夜空中最亮的星</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/bg.png" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">Chen Ao</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">生于忧患，死于安乐</p>
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="false" />
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class='no-result'>No results found <i class='fa fa-spinner fa-pulse'></i></p>
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                            <li><a href="/about/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto:jim735410965@126.com" title="Email"></a>
+                            
+                                <a class="fa 新浪微博" href="http://weibo.com/u/1773408564" title="新浪微博"></a>
+                            
+                                <a class="fa GitHub" href="https://github.com/ChenAo0727" title="GitHub"></a>
+                            
+                                <a class="fa 简书" href="http://www.jianshu.com/users/872519599961/latest_articles" title="简书"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/swift/">swift</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io">Hexo</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://pages.github.com/">GitHub</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.xyz/">MOxFIVE</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">毕业于杭电的一名普通的iOS Coder</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">Chen Ao</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/bg.png" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">Chen Ao</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">生于忧患，死于安乐</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                    <li><a href="/about/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto:jim735410965@126.com" title="Email"></a>
+                            
+                                <a class="fa 新浪微博" target="_blank" href="http://weibo.com/u/1773408564" title="新浪微博"></a>
+                            
+                                <a class="fa GitHub" target="_blank" href="https://github.com/ChenAo0727" title="GitHub"></a>
+                            
+                                <a class="fa 简书" target="_blank" href="http://www.jianshu.com/users/872519599961/latest_articles" title="简书"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-Swift-closure" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2016/12/27/Swift-closure/" class="article-date">
+      <time datetime="2016-12-27T06:49:22.000Z" itemprop="datePublished">2016-12-27</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Swift 闭包
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/术业专攻/">术业专攻</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/swift/">swift</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <p>Swift 中的闭包是自包含的函数代码块，可以在代码中被传递和使用。类似于OC中的Block以及其他函数的匿名函数。闭包可以捕获和存储其所在上下文中任意常量和变量的引用，被称为包裹常量和变量。Swift可以为你管理在捕获过程中涉及到的所有内存操作 <a id="more"></a></p>
+<h3 id="函数与闭包的关系"><a href="#函数与闭包的关系" class="headerlink" title="函数与闭包的关系"></a>函数与闭包的关系</h3><p>全局和嵌套函数实际上也是特殊的閉包，闭包有如下三种形式：<br>1.全局函数是一個有名字但不会捕获任何值的闭包<br>2.嵌套函数是一個有名字並可以捕获其封闭函数域内值的闭包<br>3.闭包表达式是一個利用轻量级语法所写的可以捕获其上下文中变量或常量值的匿名闭包</p>
+<ul>
+<li>闭包表达式</li>
+<li>尾随闭包</li>
+<li>值捕获</li>
+<li>闭包是引用类型</li>
+<li>逃逸闭包</li>
+<li>自动闭包</li>
+</ul>
+<h3 id="闭包表达式一般形式"><a href="#闭包表达式一般形式" class="headerlink" title="闭包表达式一般形式:"></a>闭包表达式一般形式:</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">&#123; (parameters) -&gt; returnType in</div><div class="line">    statements</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>下面以 <code>Swift</code> 标准库中的 <code>sorted(by:)</code> 方法为例，展示闭包的各种书写格式。它会根据闭包函数中的实现将数组中的值进行排序，返回一个与原数组大小相同，包含相同元素且重新排序的新数组。原数组不会被 <code>sorted(by:)</code> 方法修改 </p>
+<h3 id="最复杂的形式"><a href="#最复杂的形式" class="headerlink" title="最复杂的形式"></a>最复杂的形式</h3><p>原数组： <code>let names = [&quot;Linda&quot;, &quot;Cindy&quot;, &quot;Benty&quot;, &quot;Dandy&quot;]</code><br>排序后数组：<code>sortNames = names.sorted(by: { (s1: String, s2: String) -&gt; Bool in return s1 &lt; s2 } )   print(sortNames) // [ &quot;Benty&quot;, &quot;Cindy&quot;, &quot;Dandy&quot;,&quot;Linda&quot;]</code><br>如果第一个字符串s1小于 第二个字符串s2， 函数会返回 true，在新的数组中 s1 应该出现在 s2 前。对于字符串中的字符来说，“小于”表示“按照字母顺序较晚出现”。这意味着字母 “A” 小于字母 “B” ，字符串 “Ab” 小于字符串 “Ac”。该闭包将进行字母顺序排序，”Benty” 将会排在 “Cindy” 之前。</p>
+<h3 id="上下文推断类型"><a href="#上下文推断类型" class="headerlink" title="上下文推断类型"></a>上下文推断类型</h3><p>排序闭包函数作为 <code>sorted(by:)</code> 方法的参数传入，Swift 可以推断其参数和返回值的类型。<code>sorted(by:)</code> 方法被一个字符串数组调用，因此其参数必须是 <code>(String, String) -&gt; Bool</code> 类型。这意味着 (String, String) 和 Bool 类型并不需要作为闭包表达式定义的一部分。因为所有的类型都可以被正确推断，返回箭头（-&gt;）和围绕在参数周围的括号也可以被省略：<br><code>sortNames = names.sorted(by: { s1, s2 in return s1 &lt; s2 } )</code><br>尽管如此，你仍然可以明确写出有着完整格式的闭包。如果完整格式的闭包能够提高代码的可读性，则我们更鼓励采用完整格式的闭包。而在 <code>sorted(by:)</code> 方法这个例子里，显然闭包的目的就是排序。由于这个闭包是为了处理字符串数组的排序，因此读者能够推测出这个闭包是用于字符串处理的。</p>
+<h3 id="单表达式闭包隐式返回"><a href="#单表达式闭包隐式返回" class="headerlink" title="单表达式闭包隐式返回"></a>单表达式闭包隐式返回</h3><p><code>sortNames = names.sorted(by: { s1, s2 in s1 &lt; s2 } )</code><br>在这个例子中，<code>sorted(by:)</code> 方法的参数类型明确了闭包必须返回一个 Bool 类型值。因为闭包函数体只包含了一个单一表达式（s1 &lt; s2），该表达式返回 Bool 类型值，因此这里没有歧义，return 关键字可以省略</p>
+<h3 id="参数名称缩写"><a href="#参数名称缩写" class="headerlink" title="参数名称缩写"></a>参数名称缩写</h3><p>Swift 自动为内联闭包提供了参数名称缩写功能，你可以直接通过 $0，$1，$2 来顺序调用闭包的参数，以此类推。如果你在闭包表达式中使用参数名称缩写，你可以在闭包定义中省略参数列表，并且对应参数名称缩写的类型会通过函数类型进行推断。in关键字也同样可以被省略，因为此时闭包表达式完全由闭包函数体构成：<br><code>sortNames = names.sorted(by: { $0 &lt; $1 } )</code><br>在这个例子中，$0和$1表示闭包中第一个和第二个 String 类型的参数。</p>
+<h3 id="运算符方法"><a href="#运算符方法" class="headerlink" title="运算符方法"></a>运算符方法</h3><p>实际上还有一种更简短的方式来编写上面例子中的闭包表达式。Swift 的 String 类型定义了关于小于号（&lt;）的字符串实现，其作为一个函数接受两个 String 类型的参数并返回 Bool 类型的值。而这正好与 sorted(by:) 方法的参数需要的函数类型相符合。因此，你可以简单地传递一个小于号，Swift 可以自动推断出你想使用小于号的字符串函数实现：<br><code>sortNames = names.sorted(by: &lt;)</code></p>
+<h3 id="尾随闭包"><a href="#尾随闭包" class="headerlink" title="尾随闭包"></a>尾随闭包</h3><p>如果你需要将一个很长的闭包表达式作为最后一个参数传递给函数，可以使用尾随闭包来增强函数的可读性。尾随闭包是一个书写在函数括号之后的闭包表达式，函数支持将其作为最后一个参数调用。在使用尾随闭包时，你不用写出它的参数标签。<br> <code>sortNames = names.sorted() { $0 &lt; $1 }</code><br>如果闭包表达式是函数或方法的唯一参数，则当你使用尾随闭包时，你甚至可以把 () 省略掉：<code>sortNames =names.sorted { $0 &lt; $1 }</code></p>
+<h3 id="值捕获"><a href="#值捕获" class="headerlink" title="值捕获"></a>值捕获</h3><p>闭包可以在其被定义的上下文中捕获常量或变量。即使定义这些常量和变量的原作用域已经不存在，闭包仍然可以在闭包函数体内引用和修改这些值。<br>举个例子，这有一个叫做 <code>makeIncrementor</code> 的函数，其包含了一个叫做 <code>incrementor</code> 的嵌套函数。嵌套函数 <code>incrementor()</code> 从上下文中捕获了两个值，<code>runningTotal</code> 和 <code>amount</code>。捕获这些值之后，<code>makeIncrementor</code> 将 <code>incrementor</code> 作为闭包返回。每次调用 <code>incrementor</code> 时，其会以 <code>amount</code> 作为增量增加 <code>runningTotal</code> 的值。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">func makeIncrementer(forIncrement amount: Int) -&gt; () -&gt; Int &#123;</div><div class="line">    var runningTotal = 0</div><div class="line">    func incrementer() -&gt; Int &#123;</div><div class="line">        runningTotal += amount</div><div class="line">        return runningTotal</div><div class="line">    &#125;</div><div class="line">    return incremented</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>makeIncrementor</code> 返回类型为 <code>() -&gt; Int</code>。这意味着其返回的是一个<em>函数</em>，而非一个简单类型的值。该函数在每次调用时不接受参数，只返回一个 <code>Int</code> 类型的值 <code>makeIncrementer(forIncrement:)</code> 函数定义了一个初始值为 <code>0</code> 的整型变量 <code>runningTotal</code>，用来存储当前总计数值。该值为 <code>incrementor</code> 的返回值<br><code>makeIncrementer(forIncrement:)</code> 有一个 <code>Int</code> 类型的参数，其外部参数名为 <code>forIncrement</code>，内部参数名为 <code>amount</code>，该参数表示每次<br> <code>incrementor</code> 被调用时 <code>runningTotal</code> 将要增加的量。<code>makeIncrementer</code> 函数还定义了一个嵌套函数 <code>incrementor</code>，用来执行实际的增加操作。该函数简单地使 <code>runningTotal</code> 增加 <code>amount</code>，并将其返回。<br>如果我们单独考虑嵌套函数 <code>incrementer()</code>，会发现它有些不同寻常：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">func incrementer() -&gt; Int &#123;</div><div class="line">    runningTotal += amount</div><div class="line">    return runningTotal</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>incrementer()</code> 函数并没有任何参数，但是在函数体内访问了 <code>runningTotal</code> 和 <code>amount</code> 变量。这是因为它从外围函数捕获了<br><code>runningTotal</code> 和 <code>amount</code> 变量的<em>引用</em>。捕获引用保证了 <code>runningTotal</code> 和 <code>amount</code> 变量在调用完 <code>makeIncrementer</code> 后不会消失，并且保证了在下一次执行 <code>incrementer</code> 函数时，<code>runningTotal</code> 依旧存在。</p>
+<h3 id="闭包是引用类型"><a href="#闭包是引用类型" class="headerlink" title="闭包是引用类型"></a>闭包是引用类型</h3><p>上面的例子中，incrementBySeven 和 incrementByTen 都是常量，但是这些常量指向的闭包仍然可以增加其捕获的变量的值。这是因为函数和闭包都是引用类型。无论你将函数或闭包赋值给一个常量还是变量，你实际上都是将常量或变量的值设置为对应函数或闭包的引用。上面的例子中，指向闭包的引用 incrementByTen 是一个常量，而并非闭包内容本身。这也意味着如果你将闭包赋值给了两个不同的常量或变量，两个值都会指向同一个闭包：<br><code>let alsoIncrementByTen = incrementByTen alsoIncrementByTen() // 返回的值为50</code></p>
+<h3 id="逃逸闭包"><a href="#逃逸闭包" class="headerlink" title="逃逸闭包"></a>逃逸闭包</h3><p>当一个闭包作为参数传到一个函数中，但是这个闭包在函数返回之后才被执行，我们称该闭包从函数中逃逸。当你定义接受闭包作为参数的函数时，你可以在参数名之前标注 <code>@escaping</code>，用来指明这个闭包是允许“逃逸”出这个函数的。一种能使闭包“逃逸”出函数的方法是，将这个闭包保存在一个函数外部定义的变量中。举个例子，很多启动异步操作的函数接受一个闭包参数作为 <code>completion handler</code>。这类函数会在异步操作开始之后立刻返回，但是闭包直到异步操作结束后才会被调用。在这种情况下，闭包需要“逃逸”出函数，因为闭包需要在函数返回之后被调用。例如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">var completionHandlers: [() -&gt; Void] = [] </div><div class="line">//逃逸闭包</div><div class="line">func someFunctionWithEscapingClosure(completionHandler: @escaping () -&gt; Void) &#123;</div><div class="line">     completionHandlers.append(completionHandler)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p> <code>someFunctionWithEscapingClosure(_:)</code> 函数接受一个闭包作为参数，该闭包被添加到一个函数外定义的数组中。如果你不将这个参数标记为 <code>@escaping</code> 就会得到一个编译错误。将一个闭包标记为 <code>@escaping</code> 意味着你必须在闭包中显式地引用 <code>self</code> 。比如说，在下面的代码中，传递到 <code>someFunctionWithEscapingClosure(_:)</code> 中的闭包是一个逃逸闭包，这意味着它需要显式地引用 <code>self</code>。相对的，<br> 传递到 <code>someFunctionWithNonescapingClosure(_:)</code> 中的闭包是一个非逃逸闭包，这意味着它可以隐式引用 <code>self</code>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">func someFunctionWithNonescapingClosure(closure: () -&gt; Void) &#123; </div><div class="line">    closure() </div><div class="line">&#125; </div><div class="line">        var x = 10</div><div class="line">        func doSomething() &#123; </div><div class="line">        someFunctionWithEscapingClosure &#123; </div><div class="line">           //逃逸闭包 需要显式地引用 self</div><div class="line">          //调用doSomething 不会执行闭包</div><div class="line">            self.x = 100 </div><div class="line">       &#125; </div><div class="line">       someFunctionWithNonescapingClosure &#123; </div><div class="line">          //因为不是逃逸闭包，调用doSomething 执行闭包</div><div class="line">           x = 200</div><div class="line">      &#125; </div><div class="line">   &#125; </div><div class="line"></div><div class="line">      doSomething() </div><div class="line">      print(x) // 打印出 &quot;200&quot; </div><div class="line">      completionHandlers.first?()</div><div class="line">      print(x)  // 打印出 &quot;100&quot;  逃逸闭包调用</div></pre></td></tr></table></figure>
+<h3 id="自动闭包"><a href="#自动闭包" class="headerlink" title="自动闭包"></a>自动闭包</h3><p>自动闭包是一种自动创建的闭包，用于包装传递给函数作为参数的表达式。这种闭包不接受任何参数，当它被调用的时候，会返回被包装在其中的表达式的值。这种便利语法让你能够省略闭包的花括号，用一个普通的表达式来代替显式的闭包。<br>我们经常会调用采用自动闭包的函数，但是很少去实现这样的函数。举个例子来说，<code>assert(condition:message:file:line:)</code> 函数接受自动闭包作为它的 <code>condition</code> 参数和 <code>message</code>参数；它的 <code>condition</code> 参数仅会在 <code>debug</code> 模式下被求值，它的 message 参数仅当<br> <code>condition</code> 参数为 <code>false</code> 时被计算求值。<br>自动闭包让你能够延迟求值，因为直到你调用这个闭包，代码段才会被执行。延迟求值对于那些有副作用（Side Effect）和高计算成本的代码来说是很有益处的，因为它使得你能控制代码的执行时机。下面的代码展示了闭包如何延时求值。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">var customersInLine = [&quot;Chris&quot;, &quot;Alex&quot;, &quot;Ewa&quot;, &quot;Barry&quot;, &quot;Daniella&quot;]</div><div class="line">print(customersInLine.count)</div><div class="line">// 打印出 &quot;5&quot;</div><div class="line">let customerProvider = &#123; customersInLine.remove(at: 0) &#125;</div><div class="line">print(customersInLine.count)</div><div class="line">// 打印出 &quot;5&quot;</div><div class="line">print(&quot;Now serving \(customerProvider())!&quot;)</div><div class="line">// Prints &quot;Now serving Chris!&quot;</div><div class="line">print(customersInLine.count)</div><div class="line">// 打印出 &quot;4&quot;</div></pre></td></tr></table></figure>
+<p>尽管在闭包的代码中，<code>customersInLine</code> 的第一个元素被移除了，不过在闭包被调用之前，这个元素是不会被移除的。如果这个闭包永远不被调用，那么在闭包里面的表达式将永远不会执行，那意味着列表中的元素永远不会被移除。请注意，<code>customerProvider</code> 的类型不是<br><code>String</code> ，而是<code>() -&gt; String</code> ，一个没有参数且返回值为 <code>String</code> 的函数。将闭包作为参数传递给函数时，你能获得同样的延时求值行为。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">   let customersInLine = [&quot;Alex&quot;, &quot;Ewa&quot;, &quot;Barry&quot;, &quot;Daniella&quot;] </div><div class="line">    func serve(customer customerProvider: () -&gt; String) &#123;</div><div class="line">    print(&quot;Now serving \(customerProvider())!&quot;) </div><div class="line">&#125; </div><div class="line"> serve(customer: &#123; customersInLine.remove(at: 0) &#125; )</div><div class="line"> // 打印出 &quot;Now serving Alex!&quot;</div></pre></td></tr></table></figure>
+<p>上面的 <code>serve(customer:)</code> 函数接受一个返回顾客名字的显式的闭包。下面这个版本的 <code>serve(customer:)</code> 完成了相同的操作，不过它并没有接受一个显式的闭包，而是通过将参数标记为 <code>@autoclosure</code> 来接收一个自动闭包。现在你可以将该函数当作接受 <code>String</code> 类型参数<br>（而非闭包）的函数来调用。<code>customerProvider</code> 参数将自动转化为一个闭包，因为该参数被标记了<code>@autoclosure</code> 特性。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">    let customersInLine = [&quot;Ewa&quot;, &quot;Barry&quot;, &quot;Daniella&quot;]</div><div class="line">    func serve(customer customerProvider: @autoclosure () -&gt; String) &#123; </div><div class="line">    print(&quot;Now serving \(customerProvider())!&quot;)</div><div class="line"> &#125; </div><div class="line">serve(customer: customersInLine.remove(at: 0)) </div><div class="line">// 打印 &quot;Now serving Ewa!&quot;</div></pre></td></tr></table></figure>
+<p>注意 过度使用 <code>autoclosures</code> 会让你的代码变得难以理解。上下文和函数名应该能够清晰地表明求值是被延迟执行的。</p>
+<p>如果你想让一个自动闭包可以“逃逸”，则应该同时使用 <code>@autoclosure</code> 和 <code>@escaping</code> 属性。<code>@escaping</code> 属性的讲解见上面的逃逸闭包。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">customersInLine i= [&quot;Barry&quot;, &quot;Daniella&quot;] </div><div class="line">var customerProviders: [() -&gt; String] = []</div><div class="line"> func collectCustomerProviders(_ customerProvider: @autoclosure @escaping () -&gt; String) &#123; </div><div class="line">customerProviders.append(customerProvider) </div><div class="line">&#125;</div><div class="line"> collectCustomerProviders(customersInLine.remove(at: 0)) </div><div class="line"> collectCustomerProviders(customersInLine.remove(at: 0))</div><div class="line"> print(&quot;Collected (customerProviders.count) closures.&quot;) </div><div class="line">// 打印 &quot;Collected 2 closures.&quot;</div><div class="line"> for customerProvider in customerProviders &#123;</div><div class="line"> print(&quot;Now serving (customerProvider())!&quot;) </div><div class="line">&#125; // 打印 &quot;Now serving Barry!&quot; // 打印 &quot;Now serving Daniella!&quot;</div></pre></td></tr></table></figure>
+<p>在上面的代码中，<code>collectCustomerProviders(_:)</code> 函数并没有调用传入的 <code>customerProvider</code> 闭包<br>而是将闭包追加到了 <code>customerProviders</code> 数组中。这个数组定义在函数作用域范围外，这意味着数组内的闭包能够在函数返回之后被调用。因此，<code>customerProvider</code> 参数必须允许“逃逸”出函数作用域。</p>
+<h3 id="结束"><a href="#结束" class="headerlink" title="结束"></a>结束</h3><p>本文内容摘自中文版 Apple 官方 Swift 教程，对于初学swift的朋友有较大帮助，下面是苹果官方文档链接和github中文文档链接 <a href="https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/Closures.html#//apple_ref/doc/uid/TP40014097-CH11-ID94" target="_blank" rel="external">官方文档</a> <a href="https://github.com/numbbbbb/the-swift-programming-language-in-chinese" target="_blank" rel="external">中文文档</a></p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2016/12/27/Swift-closure/">Swift 闭包</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">Chen Ao</a></p>
+        <p><span>发布时间:</span>2016-12-27, 14:49:22</p>
+        <p><span>最后更新:</span>2016-12-27, 17:21:15</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2016/12/27/Swift-closure/" title="Swift 闭包">http://ChenAo0727.github.io/2016/12/27/Swift-closure/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://ChenAo0727.github.io/2016/12/27/Swift-closure/　　作者: Chen Ao" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2016/12/28/hexo/">
+                    Hexo + Github-Pages 从零开始搭建个人博客
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2016/12/26/Kingfisher/">
+                    Kingfisher 3.x 学习（一）
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#函数与闭包的关系"><span class="toc-number">1.</span> <span class="toc-text">函数与闭包的关系</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#闭包表达式一般形式"><span class="toc-number">2.</span> <span class="toc-text">闭包表达式一般形式:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#最复杂的形式"><span class="toc-number">3.</span> <span class="toc-text">最复杂的形式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#上下文推断类型"><span class="toc-number">4.</span> <span class="toc-text">上下文推断类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#单表达式闭包隐式返回"><span class="toc-number">5.</span> <span class="toc-text">单表达式闭包隐式返回</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#参数名称缩写"><span class="toc-number">6.</span> <span class="toc-text">参数名称缩写</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#运算符方法"><span class="toc-number">7.</span> <span class="toc-text">运算符方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#尾随闭包"><span class="toc-number">8.</span> <span class="toc-text">尾随闭包</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#值捕获"><span class="toc-number">9.</span> <span class="toc-text">值捕获</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#闭包是引用类型"><span class="toc-number">10.</span> <span class="toc-text">闭包是引用类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#逃逸闭包"><span class="toc-number">11.</span> <span class="toc-text">逃逸闭包</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#自动闭包"><span class="toc-number">12.</span> <span class="toc-text">自动闭包</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#结束"><span class="toc-number">13.</span> <span class="toc-text">结束</span></a></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"Swift 闭包　| 夜空中最亮的星　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+      <div class="duoshuo" id="comments">
+    <div id="comment-box" ></div>
+    <div class="ds-thread" id="ds-thread" data-thread-key="2016/12/27/Swift-closure/" data-title="Swift 闭包" data-url="http://ChenAo0727.github.io/2016/12/27/Swift-closure/"></div>
+    <script>
+        var duoshuoQuery = {short_name:"chenao0727github"};
+        var loadComment = function(){
+            var d = document, s = d.createElement('script');
+            s.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+            s.async = true; s.charset = 'UTF-8';
+            (d.head || d.body).appendChild(s);
+        }
+
+        
+    </script>
+    
+    <script> loadComment(); </script>
+
+</div>
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2016/12/28/hexo/" title="上一篇: Hexo + Github-Pages 从零开始搭建个人博客">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2016/12/26/Kingfisher/" title="下一篇: Kingfisher 3.x 学习（一）">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2016/12/28/hexo/">Hexo + Github-Pages 从零开始搭建个人博客</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/27/Swift-closure/">Swift 闭包</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/26/Kingfisher/">Kingfisher 3.x 学习（一）</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/26/Kingfisher2/">Kingfisher 3.x 学习（二）</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2016 Chen Ao
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 5;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>

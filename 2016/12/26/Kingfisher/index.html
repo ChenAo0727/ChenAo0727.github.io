@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="Chen Ao" />
+
+
+
+<meta name="description" content="序言Kingfisher  是喵神的一个异步下载和缓存图片的Swift库，类似于OC 的SDWebImage  中文简介，github地址  我现在使用的3.版本不是很了解，直接以最新版本来学习了 由于个人水平有限 如有错误还望包涵">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kingfisher 3.x 学习（一）">
+<meta property="og:url" content="http://ChenAo0727.github.io/2016/12/26/Kingfisher/index.html">
+<meta property="og:site_name" content="夜空中最亮的星">
+<meta property="og:description" content="序言Kingfisher  是喵神的一个异步下载和缓存图片的Swift库，类似于OC 的SDWebImage  中文简介，github地址  我现在使用的3.版本不是很了解，直接以最新版本来学习了 由于个人水平有限 如有错误还望包涵">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/1618300-a79657ce3f76775f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:updated_time" content="2016-12-27T09:20:59.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Kingfisher 3.x 学习（一）">
+<meta name="twitter:description" content="序言Kingfisher  是喵神的一个异步下载和缓存图片的Swift库，类似于OC 的SDWebImage  中文简介，github地址  我现在使用的3.版本不是很了解，直接以最新版本来学习了 由于个人水平有限 如有错误还望包涵">
+<meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/1618300-a79657ce3f76775f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="夜空中最亮的星" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/favicon.png">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>Kingfisher 3.x 学习（一） | 夜空中最亮的星</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/bg.png" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">Chen Ao</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">生于忧患，死于安乐</p>
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="false" />
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class='no-result'>No results found <i class='fa fa-spinner fa-pulse'></i></p>
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                            <li><a href="/about/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto:jim735410965@126.com" title="Email"></a>
+                            
+                                <a class="fa 新浪微博" href="http://weibo.com/u/1773408564" title="新浪微博"></a>
+                            
+                                <a class="fa GitHub" href="https://github.com/ChenAo0727" title="GitHub"></a>
+                            
+                                <a class="fa 简书" href="http://www.jianshu.com/users/872519599961/latest_articles" title="简书"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/swift/">swift</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io">Hexo</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://pages.github.com/">GitHub</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.xyz/">MOxFIVE</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">毕业于杭电的一名普通的iOS Coder</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">Chen Ao</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/bg.png" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">Chen Ao</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">生于忧患，死于安乐</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                    <li><a href="/about/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto:jim735410965@126.com" title="Email"></a>
+                            
+                                <a class="fa 新浪微博" target="_blank" href="http://weibo.com/u/1773408564" title="新浪微博"></a>
+                            
+                                <a class="fa GitHub" target="_blank" href="https://github.com/ChenAo0727" title="GitHub"></a>
+                            
+                                <a class="fa 简书" target="_blank" href="http://www.jianshu.com/users/872519599961/latest_articles" title="简书"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-Kingfisher" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2016/12/26/Kingfisher/" class="article-date">
+      <time datetime="2016-12-26T12:43:23.000Z" itemprop="datePublished">2016-12-26</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kingfisher 3.x 学习（一）
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/术业专攻/">术业专攻</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/swift/">swift</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <h2 id="序言"><a href="#序言" class="headerlink" title="序言"></a>序言</h2><p><code>Kingfisher</code>  是喵神的一个异步下载和缓存图片的Swift库，类似于OC 的<code>SDWebImage</code>  <a href="http://project.onevcat.com" target="_blank" rel="external">中文简介</a>，<a href="https://github.com/onevcat/Kingfisher" target="_blank" rel="external">github地址</a>  我现在使用的3.版本不是很了解，直接以最新版本来学习了 由于个人水平有限 如有错误还望包涵  <a id="more"></a></p>
+<h2 id="Kingfisher的架构"><a href="#Kingfisher的架构" class="headerlink" title="Kingfisher的架构"></a>Kingfisher的架构</h2><p>阅读他人优秀代码是一个提高自身代码水平很好的方法。花了几天的时间，看了<code>Kingfisher</code> 的源代码，里面包含的很多知识点，让我受益匪浅。3.x版本相比与之前的版本，一个重要的改变就是<code>protocol</code> 的灵活运用，更加面向协议编程。当然还有其他很多知识，比如多线程，枚举，闭包，Extension 等等应用。 <code>Kingfisher中</code> 有<code>Core</code>，<code>Extension</code>，<code>Helpers</code> 三个目录结构 共20个文件</p>
+<p>Core<br><code>image.swift</code> 文件内部对 UIImage 以及 NSData 进行了拓展, 包含判定图片类型、图片解码以及Gif数据处理等操作<br><code>Indicator.swift</code> 图片加载时loading指示<br><code>ImageCache.swift</code> 主要负责将加载过的图片缓存至本地。<br><code>ImageDownloader.swift</code> 负责下载网络图片。<br><code>ImagePrefetcher.swift</code> 可用于提前指定一些图片下载<br><code>ImageProcessor.swift</code> 可用于将下载的数据合成图片对象<br><code>CacheSerializer.swift</code> 可用于图像对象序列化成图像数据存储到磁盘缓存和从磁盘缓存将图片数据反序列化成图像对象。<br><code>RequestModifier.swift</code> 下载图像请求修改器。<br><code>ImageTransition.swift</code> 过渡动画效果 使用<code>UIViewAnimationOptions</code>动画效果<br><code>KingfisherManager.swift</code>  Kingfisher 管理控制类，拥有图片下载及缓存功能<br><code>KingfisherOptionsInfo.swift</code> 枚举KingfisherOptionsInfoItem 配置 Kingfisher 行为的参数，包括 是否自定义缓存对象  是否自定义下载器  是否过渡动画  是否设置下载低优先级 是否强制刷新 是否仅获取缓存图片 是否仅缓存至内存、是否允许图像后台解码等设置。<br><code>Filter.swift</code> 图像过滤器<br><code>Resource.swift</code>  记录了图片的下载地址和缓存Key。<br><code>Kingfisher.swift</code> 添加KingfisherCompatible通用协议 kf新属性</p>
+<p>Extension<br><code>ImageView+Kingfisher.swift</code> <code>UIButton+Kingfisher.swift</code>  <code>NSButton+Kingfisher</code> 对 <code>UIImageView</code>  <code>UIButton</code> <code>NSButton</code> 进行了拓展 主要用于提供 Kingfisher 的外部接口。</p>
+<p>Helpers<br><code>String+MD5.swift</code> 负责图片缓存时对文件名进行MD5加密操作。<br><code>Box.swift</code> 一个简单泛型类<br><code>ThreadHelper.swift</code>中的 <code>dispatch_async_safely_main_queue</code> 函数接受一个闭包 利用 NSThread.isMainThread 判断并将其放置在主线程中执行</p>
+<h2 id="Kingfisher-swift"><a href="#Kingfisher-swift" class="headerlink" title="Kingfisher.swift"></a>Kingfisher.swift</h2><p>主要文件<code>ImageView+Kingfisher</code>,<code>KingfisherManager</code>,<code>ImageCache</code>,<code>ImageDownloader</code>,废话不多说直接代码学习</p>
+<p>运行demo 下面有这么一段代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">let url = URL(string:&quot;https://raw.githubusercontent.com/onevcat/Kingfisher/master/images/kingfisher-\(indexPath.row + 1).jpg&quot;)!</div><div class="line">(cell as! CollectionViewCell).cellImageView.kf.setImage(with: url,</div><div class="line">                                       placeholder: nil,</div><div class="line">                                       options: [.transition(.fade(1))],</div><div class="line">                                       progressBlock: &#123; receivedSize, totalSize in</div><div class="line">                                        print(&quot;\(indexPath.row + 1): \(receivedSize)/\(totalSize)&quot;)</div><div class="line">        &#125;,</div><div class="line">                                       completionHandler: &#123; image, error, cacheType, imageURL in</div><div class="line">                                        print(&quot;\(indexPath.row + 1): Finished&quot;)</div><div class="line">    &#125;)</div></pre></td></tr></table></figure></p>
+<p>首先调用的<code>UIImageView</code>的<code>kf</code>属性 之前是调用<code>UIImageView</code>的<code>Extension</code>中的<code>kf_setImage</code> ,现已弃用  那<code>kf</code> 属性是如何实现的？<br>下面是<code>Kingfisher.swift</code>源码</p>
+<ul>
+<li>自定义了不同平台下的一些类型别名  swift中的typealias 相当于OC中的typedef</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">#if os(macOS)</div><div class="line">    import AppKit</div><div class="line">    public typealias Image = NSImage</div><div class="line">    public typealias Color = NSColor</div><div class="line">    public typealias ImageView = NSImageView</div><div class="line">    typealias Button = NSButton</div><div class="line">#else</div><div class="line">    import UIKit</div><div class="line">    public typealias Image = UIImage</div><div class="line">    public typealias Color = UIColor</div><div class="line">    #if !os(watchOS)</div><div class="line">    public typealias ImageView = UIImageView</div><div class="line">    typealias Button = UIButton</div><div class="line">    #endif</div><div class="line">#endif</div></pre></td></tr></table></figure>
+<ul>
+<li>申明了泛型类Kingfisher 实现了一个简单构造器，其中上面的cellImageView就是base属性</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">public final class Kingfisher&lt;Base&gt; &#123;</div><div class="line">    public let base: Base</div><div class="line">    public init(_ base: Base) &#123;</div><div class="line">        self.base = base</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>申明KingfisherCompatible协议 有一个可读属性kf 其类型是关联类型</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> A type that has Kingfisher extensions.</div><div class="line"> */</div><div class="line"></div><div class="line">public protocol KingfisherCompatible &#123;</div><div class="line">    associatedtype CompatibleType</div><div class="line">    var kf: CompatibleType &#123; get &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>KingfisherCompatible协议的实现 属性kf关联Kingfisher类型 返回一个Kingfisher实例 base 参数就是传入的self</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">public extension KingfisherCompatible &#123;</div><div class="line">    public var kf: Kingfisher&lt;Self&gt; &#123;</div><div class="line">        get &#123; return Kingfisher(self) &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>Image ImageView Button 遵守 KingfisherCompatible 协议 所以上边的self参数就是遵守了协议的类型 因此base属性即cellImageView</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">extension Image: KingfisherCompatible &#123; &#125;</div><div class="line">#if !os(watchOS)</div><div class="line">extension ImageView: KingfisherCompatible &#123;&#125;</div><div class="line">extension Button: KingfisherCompatible &#123; &#125;</div><div class="line">#endif</div></pre></td></tr></table></figure>
+<h2 id="ImageView-Kingfisher"><a href="#ImageView-Kingfisher" class="headerlink" title="ImageView+Kingfisher"></a>ImageView+Kingfisher</h2><p>现在来说说<code>setImage</code>这个方法的实现 这个方法是在<code>Kingfisher</code>的Extension 中实现 并且要求<code>Base</code>属于<code>UIImageView</code>类型 即<code>where Base: ImageView</code> 由于<code>kf</code> 属性关联了<code>Kingfisher</code><br> 所以可以调用<code>(cell as! CollectionViewCell).cellImageView.kf.setImage</code><br>Extensions目录下的三个文件都是类似实现的 这里就以ImageView+Kingfisher.swift为例<br>下面方法是外部使用Kingfisher最频繁也是最重要的方法<br>第一个参数<code>Resource</code>是一个URL遵守的Protocol，一般传入图片的URL，不可为空<br>第二个参数<code>placeholder</code>是一个默认的占位图，可为空<br>第三个参数<code>KingfisherOptionsInfo</code> 是个枚举数组，配置Kingfisher下载图片的一些操作行为<br>第四个参数<code>DownloadProgressBlock</code>是个下载进度闭包，可以用于更新下载UI<br>第五个参数<code>completionHandler</code>是个下载完成闭包，闭包参数包含图片，错误，缓存类型，URL 信息</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div></pre></td><td class="code"><pre><div class="line">extension Kingfisher where Base: ImageView &#123;</div><div class="line">    /**</div><div class="line">     Set an image with a resource, a placeholder image, options, progress handler and completion handler.</div><div class="line">     </div><div class="line">     - parameter resource:          Resource object contains information such as `cacheKey` and `downloadURL`.</div><div class="line">     - parameter placeholder:       A placeholder image when retrieving the image at URL.</div><div class="line">     - parameter options:           A dictionary could control some behaviors. See `KingfisherOptionsInfo` for more.</div><div class="line">     - parameter progressBlock:     Called when the image downloading progress gets updated.</div><div class="line">     - parameter completionHandler: Called when the image retrieved and set.</div><div class="line">     </div><div class="line">     - returns: A task represents the retrieving process.</div><div class="line">     </div><div class="line">     - note: Both the `progressBlock` and `completionHandler` will be invoked in main thread.</div><div class="line">     The `CallbackDispatchQueue` specified in `optionsInfo` will not be used in callbacks of this method.</div><div class="line">     */</div><div class="line">    @discardableResult 忽略返回值警告</div><div class="line">    public func setImage(with resource: Resource?,</div><div class="line">                         placeholder: Image? = nil,</div><div class="line">                         options: KingfisherOptionsInfo? = nil,</div><div class="line">                         progressBlock: DownloadProgressBlock? = nil,</div><div class="line">                         completionHandler: CompletionHandler? = nil) -&gt; RetrieveImageTask</div><div class="line">    &#123;</div><div class="line">        当传入的resource为空时 使用guard语句提前退出 Resource是一个协议 URL遵守此协议 Resource有两个属性 cacheKey和downloadURL</div><div class="line">        guard let resource = resource else &#123;</div><div class="line">            base.image = placeholder</div><div class="line">            completionHandler?(nil, nil, .none, nil)</div><div class="line">            return .empty</div><div class="line">        &#125;</div><div class="line">        图片加载过程中是否显示placeholder</div><div class="line">        var options = options ?? KingfisherEmptyOptionsInfo</div><div class="line">        if !options.keepCurrentImageWhileLoading &#123;</div><div class="line">            base.image = placeholder</div><div class="line">        &#125;</div><div class="line">        如果indicator存在，开启转圈动画 indicator 通过属性关联存取</div><div class="line">        let maybeIndicator = indicator</div><div class="line">        maybeIndicator?.startAnimatingView()</div><div class="line">        关联属性绑定下载的URL</div><div class="line">        setWebURL(resource.downloadURL)</div><div class="line"></div><div class="line">        默认开启加载所有GIF图片数据，显示GIF 动态图片</div><div class="line">        if base.shouldPreloadAllGIF() &#123;</div><div class="line">            options.append(.preloadAllGIFData)</div><div class="line">        &#125;</div><div class="line">        调用KingfisherManager的方法来获取图片</div><div class="line">        let task = KingfisherManager.shared.retrieveImage(</div><div class="line">            with: resource,</div><div class="line">            options: options,</div><div class="line">            progressBlock: &#123; receivedSize, totalSize in</div><div class="line">                下载进度回调</div><div class="line">                if let progressBlock = progressBlock &#123;</div><div class="line">                    progressBlock(receivedSize, totalSize)</div><div class="line">                &#125;</div><div class="line">            &#125;,</div><div class="line">            completionHandler: &#123;[weak base] image, error, cacheType, imageURL in</div><div class="line">                确保线程安全</div><div class="line">                DispatchQueue.main.safeAsync &#123;</div><div class="line">                    确保返回的图片与URL对应一致</div><div class="line">                    guard let strongBase = base, imageURL == self.webURL else &#123;</div><div class="line">                        return</div><div class="line">                    &#125;</div><div class="line">                    self.setImageTask(nil)</div><div class="line">                    没有图片返回停止动画返回错误</div><div class="line">                    guard let image = image else &#123;</div><div class="line">                        maybeIndicator?.stopAnimatingView()</div><div class="line">                        completionHandler?(nil, error, cacheType, imageURL)</div><div class="line">                        return</div><div class="line">                    &#125;</div><div class="line">                    是否需要过渡动画 transitionItem 为 options中第一个.transition</div><div class="line">                    需要过渡动画需要满足以下情况</div><div class="line">                    1.transitionItem存在且不为.transition(.none)</div><div class="line">                    2.options.forceTransition存在 或者 cacheType == .none </div><div class="line">                    guard let transitionItem = options.firstMatchIgnoringAssociatedValue(.transition(.none)),</div><div class="line">                        case .transition(let transition) = transitionItem, ( options.forceTransition || cacheType == .none) else</div><div class="line">                    &#123;</div><div class="line">                        maybeIndicator?.stopAnimatingView()</div><div class="line">                        strongBase.image = image</div><div class="line">                        completionHandler?(image, error, cacheType, imageURL)</div><div class="line">                        return</div><div class="line">                    &#125;</div><div class="line">                    过渡动画</div><div class="line">                    #if !os(macOS)</div><div class="line">                        UIView.transition(with: strongBase, duration: 0.0, options: [],</div><div class="line">                                          animations: &#123; maybeIndicator?.stopAnimatingView() &#125;,</div><div class="line">                                          completion: &#123; _ in</div><div class="line">                                            UIView.transition(with: strongBase, duration: transition.duration,</div><div class="line">                                                              options: [transition.animationOptions, .allowUserInteraction],</div><div class="line">                                                              animations: &#123;</div><div class="line">                                                                // Set image property in the animation.</div><div class="line">                                                                设置图片，如果是自定义动画 在定义动画回调中设置图片，代码在ImageTransition.swift</div><div class="line">                                                                transition.animations?(strongBase, image)</div><div class="line">                                                              &#125;,</div><div class="line">                                                              completion: &#123; finished in</div><div class="line">                                                                动画结束回调</div><div class="line">                                                                transition.completion?(finished)</div><div class="line">                                                                completionHandler?(image, error, cacheType, imageURL)</div><div class="line">                                                              &#125;)</div><div class="line">                                          &#125;)</div><div class="line">                    #endif</div><div class="line">                &#125;</div><div class="line">            &#125;)</div><div class="line">        setImageTask(task)</div><div class="line">   return task</div><div class="line">    &#125;</div><div class="line">    /**</div><div class="line">     Cancel the image download task bounded to the image view if it is running.</div><div class="line">     Nothing will happen if the downloading has already finished.</div><div class="line">     */</div><div class="line">    取消下载</div><div class="line">    public func cancelDownloadTask() &#123;</div><div class="line">        imageTask?.downloadTask?.cancel()</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>ImageView+Kingfisher</code> 中的<code>WebUR</code> ，<code>indicatorType</code> ，<code>indicator</code>， <code>imageTask</code> 属性均使用属性关联技术实现数据的存取 </p>
+<h2 id="KingfisherManager"><a href="#KingfisherManager" class="headerlink" title="KingfisherManager"></a>KingfisherManager</h2><p>该类是<code>Kingfisher</code>唯一的一个管理调度类。这个类有下载和缓存两大功能模块 主要包含了两个属性 两个方法<br>  <code>public var cache: ImageCache</code> 图片缓存属性<br> <code>public var downloader: ImageDownloader</code>  图片下载属性<br> <code>func downloadAndCacheImage</code> 下载并且缓存图片方法<br><code>func tryToRetrieveImageFromCache</code> 获取缓存图片</p>
+<p>在<code>ImageView+Kingfisher</code>中最后图片的获取就是由<code>KingfisherManager</code>的单例实现的<code>retrieveImage</code></p>
+<ul>
+<li>外部调用获取图片方法</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">func retrieveImage(with resource: Resource,</div><div class="line">        options: KingfisherOptionsInfo?,</div><div class="line">        progressBlock: DownloadProgressBlock?,</div><div class="line">        completionHandler: CompletionHandler?) -&gt; RetrieveImageTask&#123;</div><div class="line">        let task = RetrieveImageTask()</div><div class="line">        if let options = options, options.forceRefresh &#123;</div><div class="line">             强制刷新 从网络获取图片</div><div class="line">            _ = downloadAndCacheImage(</div><div class="line">                with: resource.downloadURL,</div><div class="line">                forKey: resource.cacheKey,</div><div class="line">                retrieveImageTask: task,</div><div class="line">                progressBlock: progressBlock,</div><div class="line">                completionHandler: completionHandler,</div><div class="line">                options: options)</div><div class="line">        &#125; else &#123;</div><div class="line">            从缓存获取图片</div><div class="line">            tryToRetrieveImageFromCache(</div><div class="line">                forKey: resource.cacheKey,</div><div class="line">                with: resource.downloadURL,</div><div class="line">                retrieveImageTask: task,</div><div class="line">                progressBlock: progressBlock,</div><div class="line">                completionHandler: completionHandler,</div><div class="line">                options: options)</div><div class="line">        &#125;</div><div class="line">        return task</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>下载并且缓存图片的方法</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div></pre></td><td class="code"><pre><div class="line">func downloadAndCacheImage(with url: URL,</div><div class="line">                          forKey key: String,</div><div class="line">                   retrieveImageTask: RetrieveImageTask,</div><div class="line">                       progressBlock: DownloadProgressBlock?,</div><div class="line">                   completionHandler: CompletionHandler?,</div><div class="line">                             options: KingfisherOptionsInfo?) -&gt; RetrieveImageDownloadTask?</div><div class="line"> &#123;</div><div class="line">     获取下载器 并开启下载 </div><div class="line">     let options = options ?? KingfisherEmptyOptionsInfo</div><div class="line">     let downloader = options.downloader</div><div class="line">     return downloader.downloadImage(with: url, retrieveImageTask: retrieveImageTask, options: options,</div><div class="line">         progressBlock: &#123; receivedSize, totalSize in</div><div class="line">             progressBlock?(receivedSize, totalSize)</div><div class="line">         &#125;,</div><div class="line">         completionHandler: &#123; image, error, imageURL, originalData in</div><div class="line"></div><div class="line">             let targetCache = options.targetCache</div><div class="line">             if let error = error, error.code == KingfisherError.notModified.rawValue &#123;</div><div class="line">                 // Not modified. Try to find the image from cache.</div><div class="line">                 // (The image should be in cache. It should be guaranteed by the framework users.)</div><div class="line">                如果有错误并且没有修改过URL 返回缓存图片</div><div class="line">                 targetCache.retrieveImage(forKey: key, options: options, completionHandler: &#123; (cacheImage, cacheType) -&gt; () in</div><div class="line">                     completionHandler?(cacheImage, nil, cacheType, url)</div><div class="line">                 &#125;)</div><div class="line">                 return</div><div class="line">             &#125;</div><div class="line">             缓存图片 </div><div class="line">             if let image = image, let originalData = originalData &#123;</div><div class="line">                 targetCache.store(image,</div><div class="line">                                   original: originalData,</div><div class="line">                                   forKey: key,</div><div class="line">                                   processorIdentifier:options.processor.identifier,</div><div class="line">                                   cacheSerializer: options.cacheSerializer,</div><div class="line">                                   toDisk: !options.cacheMemoryOnly,</div><div class="line">                                   completionHandler: nil)</div><div class="line">             &#125;</div><div class="line"></div><div class="line">             completionHandler?(image, error, .none, url)</div><div class="line"></div><div class="line">         &#125;)</div><div class="line"> &#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>优先从缓存获取图片，如缓存中没有，在从网络获取图片</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div></pre></td><td class="code"><pre><div class="line">func tryToRetrieveImageFromCache(forKey key: String,</div><div class="line">                                   with url: URL,</div><div class="line">                          retrieveImageTask: RetrieveImageTask,</div><div class="line">                              progressBlock: DownloadProgressBlock?,</div><div class="line">                          completionHandler: CompletionHandler?,</div><div class="line">                                    options: KingfisherOptionsInfo?)</div><div class="line">&#123;</div><div class="line">    打破下面diskTask内部闭包保持的循环引用，完成之后取消磁盘任务引用，避免循环引用，释放内存</div><div class="line">    let diskTaskCompletionHandler: CompletionHandler = &#123; (image, error, cacheType, imageURL) -&gt; () in</div><div class="line">        // Break retain cycle created inside diskTask closure below</div><div class="line">        retrieveImageTask.diskRetrieveTask = nil</div><div class="line">        completionHandler?(image, error, cacheType, imageURL)</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    let targetCache = options?.targetCache ?? cache</div><div class="line">    let diskTask = targetCache.retrieveImage(forKey: key, options: options,</div><div class="line">        completionHandler: &#123; image, cacheType in</div><div class="line">            if image != nil &#123;</div><div class="line">                 成功返回图片</div><div class="line">                diskTaskCompletionHandler(image, nil, cacheType, url)</div><div class="line">            &#125; else if let options = options, options.onlyFromCache &#123;</div><div class="line">                返回失败 并且设置只从缓存获取图片 返回没有缓存错误</div><div class="line">                let error = NSError(domain: KingfisherErrorDomain, code: KingfisherError.notCached.rawValue, userInfo: nil)</div><div class="line">                diskTaskCompletionHandler(nil, error, .none, url)</div><div class="line">            &#125; else &#123;</div><div class="line">                返回失败 再从网络下载图片</div><div class="line">                self.downloadAndCacheImage(</div><div class="line">                    with: url,</div><div class="line">                    forKey: key,</div><div class="line">                    retrieveImageTask: retrieveImageTask,</div><div class="line">                    progressBlock: progressBlock,</div><div class="line">                    completionHandler: diskTaskCompletionHandler,</div><div class="line">                    options: options)</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    )</div><div class="line">    retrieveImageTask.diskRetrieveTask = diskTask</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="KingfisherOptionsInfo"><a href="#KingfisherOptionsInfo" class="headerlink" title="KingfisherOptionsInfo"></a>KingfisherOptionsInfo</h2><p>上面代码多次用到<code>options</code>这个参数，它的参数类型是<code>KingfisherOptionsInfo</code>是一个类型别名<br><code>public typealias KingfisherOptionsInfo = [KingfisherOptionsInfoItem]</code><br><code>KingfisherOptionsInfoItem</code> 是一个枚举 配置 <code>Kingfisher</code> 所有功能行为 下面是详细中文注释</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div></pre></td><td class="code"><pre><div class="line">public enum KingfisherOptionsInfoItem &#123;</div><div class="line"></div><div class="line">    这个成员的关联值是一个ImageCache对象。 Kingfisher使用指定的缓存对象处理 相关业务,包括试图检索缓存图像和存储下载的图片。</div><div class="line">    case targetCache(ImageCache)</div><div class="line"></div><div class="line">    这个成员的关联值应该是一个ImageDownloader对象。Kingfisher将使用这个下载器下载的图片。</div><div class="line">    case downloader(ImageDownloader)</div><div class="line"></div><div class="line">    如果从网络下载的图片 Kingfisher将使用“ImageTransition这个枚举动画。从内存或磁盘缓存时默认过渡不会发生。如果需要,设置ForceTransition</div><div class="line">    case transition(ImageTransition)</div><div class="line"></div><div class="line">    有关“浮动”值将被设置为图像下载任务的优先级。值在0.0 ~ 1.0之间。如果没有设置这个选项,默认值(“NSURLSessionTaskPriorityDefault”)将被使用。</div><div class="line">    case downloadPriority(Float)</div><div class="line"></div><div class="line">    如果设置,将忽略缓存,开启一个下载任务的资源</div><div class="line">    case forceRefresh</div><div class="line">    </div><div class="line">    如果设置 即使缓存的图片也将开启过渡动画</div><div class="line">    case forceTransition</div><div class="line"></div><div class="line">    如果设置，Kingfisher只会在内存中缓存值而不是磁盘</div><div class="line">    case cacheMemoryOnly</div><div class="line"></div><div class="line">    如果设置 Kingfisher只会从缓存中加载图片</div><div class="line">    case onlyFromCache</div><div class="line">    </div><div class="line">    在使用之前在后台线程解码图像</div><div class="line">    case backgroundDecode</div><div class="line">    </div><div class="line">    当从缓存检索图像时 这个成员的关联值将被用作目标队列的调度时回调。如果没 有设置, Kingfisher将使用主要quese回调</div><div class="line">    case callbackDispatchQueue(DispatchQueue?)</div><div class="line">    </div><div class="line">    将检索到的图片数据转换成一个图时 这个成员变量将被用作图片缩放因子。图像分辨率,而不是屏幕尺寸。你可能处理时需要指定正确的缩放因子@2x或@3x Retina图像。</div><div class="line">    case scaleFactor(CGFloat)</div><div class="line">    </div><div class="line">    是否所有的GIF应该加载数据。默认false，只显示GIF中第一张图片。如果true,所有的GIF数据将被加载到内存中进行解码。这个选项主要是用于内部的兼容性。你不应该把直接设置它。“AnimatedImageView”不会预加载所有数据,而一个正常的图像视图(“UIImageView”或“NSImageView”)将加载所有数据。选择使用相应的图像视图类型而不是设置这个选项。</div><div class="line">    case preloadAllGIFData</div><div class="line">  </div><div class="line">    发送请求之前用于改变请求。这是最后的机会你可以修改请求。您可以修改请求一些定制的目的,如添加身份验证令牌头,进行基本的HTTP身份验证或类似的url映射。原始请求默认情况下将没有任何修改</div><div class="line">    case requestModifier(ImageDownloadRequestModifier)</div><div class="line">    </div><div class="line">    下载完成时,处理器会将下载的数据转换为一个图像。如果缓存连接到下载器(当你正在使用KingfisherManager或图像扩展方法),转换后的图像也将被缓存</div><div class="line">    case processor(ImageProcessor)</div><div class="line">    </div><div class="line">    提供一个CacheSerializer 可用于图像对象序列化成图像数据存储到磁盘缓存和从磁盘缓存将图片数据反序列化成图像对象</div><div class="line">    case cacheSerializer(CacheSerializer)</div><div class="line">    </div><div class="line">    保持现有的图像同时设置另一个图像图像视图。通过设置这个选项,imageview的placeholder参数将被忽略和当前图像保持同时加载新图片</div><div class="line">    case keepCurrentImageWhileLoading</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>下面是自定义&lt;== 运算符 比较两个KingfisherOptionsInfoItem 是否相等 相等返回true 否则返回false</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">precedencegroup ItemComparisonPrecedence &#123;</div><div class="line">    associativity: none</div><div class="line">    higherThan: LogicalConjunctionPrecedence</div><div class="line">&#125;</div><div class="line"></div><div class="line">infix operator &lt;== : ItemComparisonPrecedence</div><div class="line"></div><div class="line">// This operator returns true if two `KingfisherOptionsInfoItem` enum is the same, without considering the associated values.</div><div class="line">func &lt;== (lhs: KingfisherOptionsInfoItem, rhs: KingfisherOptionsInfoItem) -&gt; Bool &#123;</div><div class="line">    switch (lhs, rhs) &#123;</div><div class="line">    case (.targetCache(_), .targetCache(_)): return true</div><div class="line">    case (.downloader(_), .downloader(_)): return true</div><div class="line">    case (.transition(_), .transition(_)): return true</div><div class="line">    case (.downloadPriority(_), .downloadPriority(_)): return true</div><div class="line">    case (.forceRefresh, .forceRefresh): return true</div><div class="line">    case (.forceTransition, .forceTransition): return true</div><div class="line">    case (.cacheMemoryOnly, .cacheMemoryOnly): return true</div><div class="line">    case (.onlyFromCache, .onlyFromCache): return true</div><div class="line">    case (.backgroundDecode, .backgroundDecode): return true</div><div class="line">    case (.callbackDispatchQueue(_), .callbackDispatchQueue(_)): return true</div><div class="line">    case (.scaleFactor(_), .scaleFactor(_)): return true</div><div class="line">    case (.preloadAllGIFData, .preloadAllGIFData): return true</div><div class="line">    case (.requestModifier(_), .requestModifier(_)): return true</div><div class="line">    case (.processor(_), .processor(_)): return true</div><div class="line">    case (.cacheSerializer(_), .cacheSerializer(_)): return true</div><div class="line">    case (.keepCurrentImageWhileLoading, .keepCurrentImageWhileLoading): return true</div><div class="line">    default: return false</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>下面是对<code>CollectionType</code>的一个扩展 返回匹配的第一个相同枚举值  上面过渡动画就有用到</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">public extension Collection where Iterator.Element == KingfisherOptionsInfoItem &#123;</div><div class="line">    func firstMatchIgnoringAssociatedValue(_ target: Iterator.Element) -&gt; Iterator.Element? &#123;</div><div class="line">        return index &#123; $0 &lt;== target &#125;.flatMap &#123; self[$0] &#125;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    func removeAllMatchesIgnoringAssociatedValue(_ target: Iterator.Element) -&gt; [Iterator.Element] &#123;</div><div class="line">        return self.filter &#123; !($0 &lt;== target) &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>在<code>KingfisherOptionsInfo</code>中有很多的类似的属性get方法 如下是关于图片编码的，默认返回<code>DefaultCacheSerializer.default</code>。如果要自定义图片编码，可以添加自定义<code>CacheSerializer</code> 到<code>Options</code>数组</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">public var cacheSerializer: CacheSerializer &#123;</div><div class="line">     if let item = firstMatchIgnoringAssociatedValue(.cacheSerializer(DefaultCacheSerializer.default)),</div><div class="line">         case .cacheSerializer(let cacheSerializer) = item</div><div class="line">     &#123;</div><div class="line">         return cacheSerializer</div><div class="line">     &#125;</div><div class="line">     return DefaultCacheSerializer.default</div><div class="line"> &#125;</div></pre></td></tr></table></figure>
+<h2 id="结束"><a href="#结束" class="headerlink" title="结束"></a>结束</h2><p>至此，我们对Kingfisher对整体架构已经有比较清晰的认识了 如下图所示</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/1618300-a79657ce3f76775f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Kingfisher.png"></p>
+<p>由于源代码比较多，一些注释都写在代码部分，可能看起来有点怪 用简书也有段时间，但这还是第一次自己写文章  接下来我会继续学习下载模块和缓存模块的过程等等 如有错误，希望大家不吝指正</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2016/12/26/Kingfisher/">Kingfisher 3.x 学习（一）</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">Chen Ao</a></p>
+        <p><span>发布时间:</span>2016-12-26, 20:43:23</p>
+        <p><span>最后更新:</span>2016-12-27, 17:20:59</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2016/12/26/Kingfisher/" title="Kingfisher 3.x 学习（一）">http://ChenAo0727.github.io/2016/12/26/Kingfisher/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://ChenAo0727.github.io/2016/12/26/Kingfisher/　　作者: Chen Ao" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2016/12/27/Swift-closure/">
+                    Swift 闭包
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2016/12/26/Kingfisher2/">
+                    Kingfisher 3.x 学习（二）
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#序言"><span class="toc-number">1.</span> <span class="toc-text">序言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Kingfisher的架构"><span class="toc-number">2.</span> <span class="toc-text">Kingfisher的架构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Kingfisher-swift"><span class="toc-number">3.</span> <span class="toc-text">Kingfisher.swift</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ImageView-Kingfisher"><span class="toc-number">4.</span> <span class="toc-text">ImageView+Kingfisher</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#KingfisherManager"><span class="toc-number">5.</span> <span class="toc-text">KingfisherManager</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#KingfisherOptionsInfo"><span class="toc-number">6.</span> <span class="toc-text">KingfisherOptionsInfo</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#结束"><span class="toc-number">7.</span> <span class="toc-text">结束</span></a></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"Kingfisher 3.x 学习（一）　| 夜空中最亮的星　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+      <div class="duoshuo" id="comments">
+    <div id="comment-box" ></div>
+    <div class="ds-thread" id="ds-thread" data-thread-key="2016/12/26/Kingfisher/" data-title="Kingfisher 3.x 学习（一）" data-url="http://ChenAo0727.github.io/2016/12/26/Kingfisher/"></div>
+    <script>
+        var duoshuoQuery = {short_name:"chenao0727github"};
+        var loadComment = function(){
+            var d = document, s = d.createElement('script');
+            s.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+            s.async = true; s.charset = 'UTF-8';
+            (d.head || d.body).appendChild(s);
+        }
+
+        
+    </script>
+    
+    <script> loadComment(); </script>
+
+</div>
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2016/12/27/Swift-closure/" title="上一篇: Swift 闭包">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2016/12/26/Kingfisher2/" title="下一篇: Kingfisher 3.x 学习（二）">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2016/12/28/hexo/">Hexo + Github-Pages 从零开始搭建个人博客</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/27/Swift-closure/">Swift 闭包</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/26/Kingfisher/">Kingfisher 3.x 学习（一）</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/26/Kingfisher2/">Kingfisher 3.x 学习（二）</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2016 Chen Ao
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 5;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>

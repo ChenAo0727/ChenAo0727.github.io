@@ -6,7 +6,7 @@
     <entry>
       <title><![CDATA[YYModel源码分析]]></title>
       <url>http://ChenAo0727.github.io/2017/01/03/YYModel/</url>
-      <content type="html"><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>YYModel 是一个iOS JSON模型转化库，和其他一些同类型库相比，具有比较好的性能优势。本文会对YYModel的源码进行分析，具体用法作者ibireme在<a href="https://github.com/ibireme/YYModel" target="_blank" rel="external">github</a>中有提及。YYModel的目录结构很简单，只有两个类, <code>NSObject+YYModel</code> 和 <code>YYClassInfo</code>。<code>YYClassInfo</code>主要对根类NSObject 的 <code>Ivar</code> , <code>Method</code>, <code>Property</code>以及<code>Class</code>本身进行了封装，<code>NSObject+YYModel</code> 是 NSObject的分类，扩展了一些JSON模型转化的方法。</p>
+      <content type="html"><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>YYModel 是一个iOS JSON模型转化库，和其他一些同类型库相比，具有比较好的性能优势。本文会对YYModel的源码进行分析，具体用法作者ibireme在<a href="https://github.com/ibireme/YYModel" target="_blank" rel="external">github</a>中有提及。YYModel的目录结构很简单，只有两个类, <code>NSObject+YYModel</code> 和 <code>YYClassInfo</code>。<code>YYClassInfo</code>主要对根类NSObject 的 <code>Ivar</code> , <code>Method</code>, <code>Property</code>以及<code>Class</code>本身进行了封装，<code>NSObject+YYModel</code> 是 NSObject的分类，扩展了一些JSON模型转化的方法。 <a id="more"></a></p>
 <h2 id="YYClassInfo"><a href="#YYClassInfo" class="headerlink" title="YYClassInfo"></a>YYClassInfo</h2><h3 id="要点"><a href="#要点" class="headerlink" title="要点"></a>要点</h3><blockquote>
 <p> YYClassIvarInfo : 对 Class的Ivar进行了封装<br> YYClassMethodInfo : 对 Class的Method进行了封装<br> YYClassPropertyInfo :  对 Class的Property进行了封装<br> YYClassInfo :  对Class进行了封装，包含了YYClassIvarInfo，YYClassMethodInfo，YYClassPropertyInfo</p>
 </blockquote>

@@ -14,19 +14,19 @@
 <meta name="author" content="Chen Ao" />
 
 
-    
-    
 
-
-<meta name="description" content="毕业于杭电的90后iOS程序猿">
-<meta property="og:type" content="website">
-<meta property="og:title" content="夜空中最亮的星">
-<meta property="og:url" content="http://ChenAo0727.github.io/index.html">
+<meta name="description" content="前言YYModel 是一个iOS JSON模型转化库，和其他一些同类型库相比，具有比较好的性能优势。本文会对YYModel的源码进行分析，具体用法作者ibireme在github中有提及。YYModel的目录结构很简单，只有两个类, NSObject+YYModel 和 YYClassInfo。YYClassInfo主要对根类NSObject 的 Ivar , Method, Property以及">
+<meta property="og:type" content="article">
+<meta property="og:title" content="YYModel源码分析">
+<meta property="og:url" content="http://ChenAo0727.github.io/2017/01/03/YYModel/index.html">
 <meta property="og:site_name" content="夜空中最亮的星">
-<meta property="og:description" content="毕业于杭电的90后iOS程序猿">
+<meta property="og:description" content="前言YYModel 是一个iOS JSON模型转化库，和其他一些同类型库相比，具有比较好的性能优势。本文会对YYModel的源码进行分析，具体用法作者ibireme在github中有提及。YYModel的目录结构很简单，只有两个类, NSObject+YYModel 和 YYClassInfo。YYClassInfo主要对根类NSObject 的 Ivar , Method, Property以及">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/1618300-fd7b658a12d7bcee.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:updated_time" content="2017-01-04T07:21:19.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="夜空中最亮的星">
-<meta name="twitter:description" content="毕业于杭电的90后iOS程序猿">
+<meta name="twitter:title" content="YYModel源码分析">
+<meta name="twitter:description" content="前言YYModel 是一个iOS JSON模型转化库，和其他一些同类型库相比，具有比较好的性能优势。本文会对YYModel的源码进行分析，具体用法作者ibireme在github中有提及。YYModel的目录结构很简单，只有两个类, NSObject+YYModel 和 YYClassInfo。YYClassInfo主要对根类NSObject 的 Ivar , Method, Property以及">
+<meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/1618300-fd7b658a12d7bcee.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 
 <link rel="apple-touch-icon" href= "/apple-touch-icon.png">
 
@@ -54,13 +54,11 @@
 <link rel="stylesheet" href="/css/style.css">
 
 
-    <style> .article { opacity: 0;} </style>
-
 
 <link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
 
 
-<title>夜空中最亮的星</title>
+<title>YYModel源码分析 | 夜空中最亮的星</title>
 
 <script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
 <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
@@ -69,8 +67,8 @@
     var yiliaConfig = {
         fancybox: true,
         animate: true,
-        isHome: true,
-        isPost: false,
+        isHome: false,
+        isPost: true,
         isArchive: false,
         isTag: false,
         isCategory: false,
@@ -279,26 +277,13 @@
     </div>
     <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
 </nav>
-      <div class="body-wrap">
-  
-    <article id="post-YYModel" class="article article-type-post" itemscope itemprop="blogPost">
+      <div class="body-wrap"><article id="post-YYModel" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
       <a href="/2017/01/03/YYModel/" class="article-date">
       <time datetime="2017-01-03T01:43:35.000Z" itemprop="datePublished">2017-01-03</time>
 </a>
 
- 
-    <a href="/2017/01/03/YYModel/#comments" title="查看评论">
-        <i class="fa fa-comments-o" aria-hidden="true"></i>
-        <span class="count-comment"></span>
-        
-            <span class="ds-thread-count"  data-thread-key="2017/01/03/YYModel/" ></span>
-        
-        
-            <span class="disqus-comment-count" data-disqus-identifier="2017/01/03/YYModel/"></span>
-        
-    </a>
 
     </div>
   
@@ -310,12 +295,27 @@
       <header class="article-header">
         
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/01/03/YYModel/">YYModel源码分析</a>
+    <h1 class="article-title" itemprop="name">
+      YYModel源码分析
     </h1>
   
 
       </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/术业专攻/">术业专攻</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/OC/">OC</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
       
     
     <div class="article-entry" itemprop="articleBody">
@@ -429,369 +429,138 @@
       
     </div>
     
-    <div class="article-info article-info-index">
-      
-      
-    <div class="article-category tagcloud">
-    <a class="article-category-link" href="/categories/术业专攻/">术业专攻</a>
-    </div>
-
-
-      
-    <div class="article-tag tagcloud">
-        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/OC/">OC</a></li></ul>
-    </div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-    
   </div>
   
-</article>
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-hexo" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2016/12/28/hexo/" class="article-date">
-      <time datetime="2016-12-28T01:25:35.000Z" itemprop="datePublished">2016-12-28</time>
-</a>
-
- 
-    <a href="/2016/12/28/hexo/#comments" title="查看评论">
-        <i class="fa fa-comments-o" aria-hidden="true"></i>
-        <span class="count-comment"></span>
-        
-            <span class="ds-thread-count"  data-thread-key="2016/12/28/hexo/" ></span>
-        
-        
-            <span class="disqus-comment-count" data-disqus-identifier="2016/12/28/hexo/"></span>
-        
-    </a>
-
-    </div>
-  
-  <div class="article-inner">
     
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/12/28/hexo/">Hexo + Github-Pages 从零开始搭建个人博客</a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-          
-              <p>   <strong>经过各种找资料，踩过各种坑，终于搭建好了个人博客，安装hexo是3.2.2版本，hexo不同的版本，配置稍微有些不一样。由于本人使用的是Mac，下面的都是针对Mac的，Windows下的配置类似。</strong></p>
-<hr>
-<h3 id="Hexo"><a href="#Hexo" class="headerlink" title="Hexo"></a>Hexo</h3><p><a href="https://github.com/hexjs/hexo">hexo</a>是一个基于Node.js的简单，快速，强大的静态博客框架,可以方便的生成静态网页托管在github上，作者是来自台湾的 Tommy Chen。特点：</p>
-<ul>
-<li>不可思议的快速 ─ 只要一眨眼静态文件即生成完成</li>
-<li>支持 Markdown</li>
-<li>仅需一道指令即可部署到 GitHub Pages 和 Heroku</li>
-<li>已移植 Octopress 插件</li>
-<li>高扩展性、自订性</li>
-<li>兼容于 Windows, Mac &amp; Linux
-          
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-    <div class="article-category tagcloud">
-    <a class="article-category-link" href="/categories/触类旁通/">触类旁通</a>
-    </div>
-
-
-      
-    <div class="article-tag tagcloud">
-        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Hexo/">Hexo</a></li></ul>
-    </div>
-
-      
-        <p class="article-more-link">
-          <a href="/2016/12/28/hexo/#more">more >></a>
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2017/01/03/YYModel/">YYModel源码分析</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">Chen Ao</a></p>
+        <p><span>发布时间:</span>2017-01-03, 09:43:35</p>
+        <p><span>最后更新:</span>2017-01-04, 15:21:19</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2017/01/03/YYModel/" title="YYModel源码分析">http://ChenAo0727.github.io/2017/01/03/YYModel/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://ChenAo0727.github.io/2017/01/03/YYModel/　　作者: Chen Ao" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
         </p>
-      
-      <div class="clearfix"></div>
-    </div>
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-Swift-closure" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2016/12/27/Swift-closure/" class="article-date">
-      <time datetime="2016-12-27T06:49:22.000Z" itemprop="datePublished">2016-12-27</time>
-</a>
-
- 
-    <a href="/2016/12/27/Swift-closure/#comments" title="查看评论">
-        <i class="fa fa-comments-o" aria-hidden="true"></i>
-        <span class="count-comment"></span>
-        
-            <span class="ds-thread-count"  data-thread-key="2016/12/27/Swift-closure/" ></span>
-        
-        
-            <span class="disqus-comment-count" data-disqus-identifier="2016/12/27/Swift-closure/"></span>
-        
-    </a>
-
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/12/27/Swift-closure/">Swift 闭包</a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-          
-              <p>Swift 中的闭包是自包含的函数代码块，可以在代码中被传递和使用。类似于OC中的Block以及其他函数的匿名函数。闭包可以捕获和存储其所在上下文中任意常量和变量的引用，被称为包裹常量和变量。Swift可以为你管理在捕获过程中涉及到的所有内存操作
-          
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-    <div class="article-category tagcloud">
-    <a class="article-category-link" href="/categories/术业专攻/">术业专攻</a>
-    </div>
-
-
-      
-    <div class="article-tag tagcloud">
-        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/swift/">swift</a></li></ul>
-    </div>
-
-      
-        <p class="article-more-link">
-          <a href="/2016/12/27/Swift-closure/#more">more >></a>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
         </p>
-      
-      <div class="clearfix"></div>
     </div>
-    
-  </div>
+
+
+
+    <nav id="article-nav">
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2016/12/28/hexo/">
+                    Hexo + Github-Pages 从零开始搭建个人博客
+                </a>
+            </div>
+        
+    </nav>
+
   
 </article>
 
-
-
-
-
-
-
-
-
-  
-    <article id="post-Kingfisher" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2016/12/26/Kingfisher/" class="article-date">
-      <time datetime="2016-12-26T12:43:23.000Z" itemprop="datePublished">2016-12-26</time>
-</a>
-
- 
-    <a href="/2016/12/26/Kingfisher/#comments" title="查看评论">
-        <i class="fa fa-comments-o" aria-hidden="true"></i>
-        <span class="count-comment"></span>
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
         
-            <span class="ds-thread-count"  data-thread-key="2016/12/26/Kingfisher/" ></span>
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#YYClassInfo"><span class="toc-number">2.</span> <span class="toc-text">YYClassInfo</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#要点"><span class="toc-number">2.1.</span> <span class="toc-text">要点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#变量类型编码"><span class="toc-number">2.2.</span> <span class="toc-text">变量类型编码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#YYEncodingType"><span class="toc-number">2.3.</span> <span class="toc-text">YYEncodingType</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Var-Method-Property"><span class="toc-number">2.4.</span> <span class="toc-text">Var Method Property</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#元类"><span class="toc-number">2.5.</span> <span class="toc-text">元类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#初始化方法"><span class="toc-number">2.6.</span> <span class="toc-text">初始化方法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#NSObject-YYModel"><span class="toc-number">3.</span> <span class="toc-text">NSObject+YYModel:</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#私有类-YYModelPropertyMeta"><span class="toc-number">3.1.</span> <span class="toc-text">私有类_YYModelPropertyMeta</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#内部实例变量"><span class="toc-number">3.1.1.</span> <span class="toc-text">内部实例变量</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#初始化方法-1"><span class="toc-number">3.1.2.</span> <span class="toc-text">初始化方法</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#私有类-YYModelMeta"><span class="toc-number">3.2.</span> <span class="toc-text">私有类_YYModelMeta</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#内部变量"><span class="toc-number">3.2.1.</span> <span class="toc-text">内部变量</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#初始化"><span class="toc-number">3.2.2.</span> <span class="toc-text">初始化</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#JSON-转-Model"><span class="toc-number">3.3.</span> <span class="toc-text">JSON 转 Model</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Model-转-JSON"><span class="toc-number">3.4.</span> <span class="toc-text">Model 转 JSON</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-number">4.</span> <span class="toc-text">参考资料</span></a></li></ol>
         
-        
-            <span class="disqus-comment-count" data-disqus-identifier="2016/12/26/Kingfisher/"></span>
-        
-    </a>
-
     </div>
-  
-  <div class="article-inner">
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
     
-      <input type="hidden" class="isFancy" />
+<div class="share">
     
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"YYModel源码分析　| 夜空中最亮的星　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
     
-      <header class="article-header">
+
+    
+</div>
+
+
+
+
+
+
+
+    
+      <div class="duoshuo" id="comments">
+    <div id="comment-box" ></div>
+    <div class="ds-thread" id="ds-thread" data-thread-key="2017/01/03/YYModel/" data-title="YYModel源码分析" data-url="http://ChenAo0727.github.io/2017/01/03/YYModel/"></div>
+    <script>
+        var duoshuoQuery = {short_name:"chenao0727github"};
+        var loadComment = function(){
+            var d = document, s = d.createElement('script');
+            s.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+            s.async = true; s.charset = 'UTF-8';
+            (d.head || d.body).appendChild(s);
+        }
+
         
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/12/26/Kingfisher/">Kingfisher 3.x 学习（一）</a>
-    </h1>
-  
-
-      </header>
-      
+    </script>
     
-    <div class="article-entry" itemprop="articleBody">
-      
-          
-              <h2 id="序言"><a href="#序言" class="headerlink" title="序言"></a>序言</h2><p><code>Kingfisher</code>  是喵神的一个异步下载和缓存图片的Swift库，类似于OC 的<code>SDWebImage</code>  <a href="http://project.onevcat.com">中文简介</a>，<a href="https://github.com/onevcat/Kingfisher">github地址</a>  我现在使用的3.版本不是很了解，直接以最新版本来学习了 由于个人水平有限 如有错误还望包涵
-          
-      
-    </div>
+    <script> loadComment(); </script>
+
+</div>
     
-    <div class="article-info article-info-index">
-      
-      
-    <div class="article-category tagcloud">
-    <a class="article-category-link" href="/categories/术业专攻/">术业专攻</a>
-    </div>
-
-
-      
-    <div class="article-tag tagcloud">
-        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/swift/">swift</a></li></ul>
-    </div>
-
-      
-        <p class="article-more-link">
-          <a href="/2016/12/26/Kingfisher/#more">more >></a>
-        </p>
-      
-      <div class="clearfix"></div>
-    </div>
-    
-  </div>
-  
-</article>
 
 
 
 
-
-
-
-
-
-  
-    <article id="post-Kingfisher2" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2016/12/26/Kingfisher2/" class="article-date">
-      <time datetime="2016-12-26T12:39:39.000Z" itemprop="datePublished">2016-12-26</time>
-</a>
-
- 
-    <a href="/2016/12/26/Kingfisher2/#comments" title="查看评论">
-        <i class="fa fa-comments-o" aria-hidden="true"></i>
-        <span class="count-comment"></span>
+    <div class="scroll" id="post-nav-button">
         
-            <span class="ds-thread-count"  data-thread-key="2016/12/26/Kingfisher2/" ></span>
+            <a href="/" title="回到主页"><i class="fa fa-home"></i></a>
         
-        
-            <span class="disqus-comment-count" data-disqus-identifier="2016/12/26/Kingfisher2/"></span>
-        
-    </a>
 
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/12/26/Kingfisher2/">Kingfisher 3.x 学习（二）</a>
-    </h1>
-  
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
 
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-          
-              <h2 id="ImageDownloader"><a href="#ImageDownloader" class="headerlink" title="ImageDownloader"></a>ImageDownloader</h2><p>在<code>Kingfisher</code> 中，该类主要负责图片的网络下载，其实现原理是基于系统的<code>URLSession</code> ,实现它的代理方法。下面是几个主要部分：</p>
-<ul>
-<li>ImageFetchLoad</li>
-<li>URLSession的配置</li>
-<li>下载方法</li>
-<li>取消下载</li>
-<li>URLSession 代理方法</li>
-<li>下载某张特定图片
-          
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-    <div class="article-category tagcloud">
-    <a class="article-category-link" href="/categories/术业专攻/">术业专攻</a>
+        
+            <a href="/2016/12/28/hexo/" title="下一篇: Hexo + Github-Pages 从零开始搭建个人博客">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
     </div>
 
-
-      
-    <div class="article-tag tagcloud">
-        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/swift/">swift</a></li></ul>
-    </div>
-
-      
-        <p class="article-more-link">
-          <a href="/2016/12/26/Kingfisher2/#more">more >></a>
-        </p>
-      
-      <div class="clearfix"></div>
-    </div>
-    
-  </div>
-  
-</article>
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/01/03/YYModel/">YYModel源码分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/28/hexo/">Hexo + Github-Pages 从零开始搭建个人博客</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/27/Swift-closure/">Swift 闭包</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/26/Kingfisher/">Kingfisher 3.x 学习（一）</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/26/Kingfisher2/">Kingfisher 3.x 学习（二）</a></li></ul>
 
 
 
 
-
-
-
-
-
-  
-  
+    <script>
+        
+    </script>
 </div>
       <footer id="footer">
     <div class="outer">
@@ -845,47 +614,6 @@
         })
     </script>
 
-
-    
-        <script>
-            if ($(".left-col").is(":visible")) {
-                var duoshuoQuery = {short_name:"chenao0727github"};
-                (function() {
-                    var d = document, s = d.createElement('script');
-                    s.src = 'http://static.duoshuo.com/embed.js';
-                    s.async = true; s.charset = 'UTF-8';
-                    (d.head || d.body).appendChild(s);
-                })();
-
-                $(document).ready(function(){
-                    var $duoshuoCount = $(".ds-thread-count");
-                    $duoshuoCount.bind("DOMNodeInserted", function(e) {
-                        var num = $(this).text().replace(/[^0-9]/ig,"");
-                        $(this).siblings(".count-comment").text(num);
-                        $(this).remove();
-                    })
-                })
-            }
-        </script>
-    
-
-    
-        <script id="dsq-count-scr" src="//chenao0727github.disqus.com/count.js" async></script>
-        <script>
-            if ($(".left-col").is(":visible")) {
-                var $disqusCount = $(".disqus-comment-count");
-                $disqusCount.bind("DOMNodeInserted", function(e) {
-                    var num = $(this).text().replace(/[^0-9]/ig,"");
-                    if (num > 0) {
-                        $(this).siblings(".count-comment").text(num);
-                    }
-                    $(this).remove();
-                })
-            } else {
-                $(".disqus-comment-count").remove();
-            }
-        </script>
-     
 
 
 

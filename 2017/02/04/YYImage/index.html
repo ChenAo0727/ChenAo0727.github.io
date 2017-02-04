@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="Chen Ao" />
+
+
+
+<meta name="description" content="前言YYImage 是一个强大的iOS图像框架，是YYKit 的组件之一。具体用法可以参考Demo。
+ 特性：
+
+支持以下类型动画图像的播放/编码/解码:  WebP, APNG, GIF。
+支持以下类型静态图像的显示/编码/解码:  WebP, PNG, GIF, JPEG, JP2, TIFF, BMP, ICO, ICNS。
+支持以下类型图片的渐进式/逐行扫描/隔行扫描解码:  PNG, G">
+<meta property="og:type" content="article">
+<meta property="og:title" content="YYImage源码分析">
+<meta property="og:url" content="http://ChenAo0727.github.io/2017/02/04/YYImage/index.html">
+<meta property="og:site_name" content="夜空中最亮的星">
+<meta property="og:description" content="前言YYImage 是一个强大的iOS图像框架，是YYKit 的组件之一。具体用法可以参考Demo。
+ 特性：
+
+支持以下类型动画图像的播放/编码/解码:  WebP, APNG, GIF。
+支持以下类型静态图像的显示/编码/解码:  WebP, PNG, GIF, JPEG, JP2, TIFF, BMP, ICO, ICNS。
+支持以下类型图片的渐进式/逐行扫描/隔行扫描解码:  PNG, G">
+<meta property="og:updated_time" content="2017-02-04T10:16:09.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="YYImage源码分析">
+<meta name="twitter:description" content="前言YYImage 是一个强大的iOS图像框架，是YYKit 的组件之一。具体用法可以参考Demo。
+ 特性：
+
+支持以下类型动画图像的播放/编码/解码:  WebP, APNG, GIF。
+支持以下类型静态图像的显示/编码/解码:  WebP, PNG, GIF, JPEG, JP2, TIFF, BMP, ICO, ICNS。
+支持以下类型图片的渐进式/逐行扫描/隔行扫描解码:  PNG, G">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="夜空中最亮的星" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/img/Coding.png">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>YYImage源码分析 | 夜空中最亮的星</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/bg.png" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">Chen Ao</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">生于忧患，死于安乐</p>
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="false" />
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class='no-result'>No results found <i class='fa fa-spinner fa-pulse'></i></p>
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>Menu</li>
+                        <li>Tags</li>
+                        
+                        <li>Friends</li>
+                        
+                        
+                        <li>About Me</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                            <li><a href="/about/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto:jim735410965@126.com" title="Email"></a>
+                            
+                                <a class="fa 新浪微博" href="http://weibo.com/u/1773408564" title="新浪微博"></a>
+                            
+                                <a class="fa GitHub" href="https://github.com/ChenAo0727" title="GitHub"></a>
+                            
+                                <a class="fa 简书" href="http://www.jianshu.com/users/872519599961/latest_articles" title="简书"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OC/">OC</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/swift/">swift</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io">Hexo</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://pages.github.com/">GitHub</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.xyz/">MOxFIVE</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">iOS Coder</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">Chen Ao</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/bg.png" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">Chen Ao</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">生于忧患，死于安乐</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                    <li><a href="/about/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto:jim735410965@126.com" title="Email"></a>
+                            
+                                <a class="fa 新浪微博" target="_blank" href="http://weibo.com/u/1773408564" title="新浪微博"></a>
+                            
+                                <a class="fa GitHub" target="_blank" href="https://github.com/ChenAo0727" title="GitHub"></a>
+                            
+                                <a class="fa 简书" target="_blank" href="http://www.jianshu.com/users/872519599961/latest_articles" title="简书"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="Tags" friends="Friends" about="About Me"/>
+</nav>
+      <div class="body-wrap"><article id="post-YYImage" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2017/02/04/YYImage/" class="article-date">
+      <time datetime="2017-02-04T10:14:59.000Z" itemprop="datePublished">2017-02-04</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      YYImage源码分析
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+
+        
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p><a href="https://github.com/ibireme/YYImage" target="_blank" rel="external">YYImage</a> 是一个强大的iOS图像框架，是YYKit 的组件之一。具体用法可以参考Demo。</p>
+<h4 id="特性："><a href="#特性：" class="headerlink" title=" 特性："></a><strong> 特性：</strong></h4><blockquote>
+<ul>
+<li>支持以下类型动画图像的播放/编码/解码:<br>  WebP, APNG, GIF。</li>
+<li>支持以下类型静态图像的显示/编码/解码:<br>  WebP, PNG, GIF, JPEG, JP2, TIFF, BMP, ICO, ICNS。</li>
+<li>支持以下类型图片的渐进式/逐行扫描/隔行扫描解码:<br>  PNG, GIF, JPEG, BMP。</li>
+<li>支持多张图片构成的帧动画播放，支持单张图片的 sprite sheet 动画。</li>
+<li>高效的动态内存缓存管理，以保证高性能低内存的动画播放。</li>
+<li>完全兼容 UIImage 和 UIImageView，使用方便。</li>
+<li>保留可扩展的接口，以支持自定义动画。</li>
+<li>每个类和方法都有完善的文档注释。<a id="more"></a>
+</li>
+</ul>
+</blockquote>
+<h4 id="文件结构"><a href="#文件结构" class="headerlink" title=" 文件结构 "></a><strong> 文件结构 </strong></h4><blockquote>
+<ul>
+<li>YYImage : UIImage的子类，遵守 YYAnimatedImage 协议，更高级的方式来显示 Image</li>
+<li>YYFrameImage : 同 YYImage，能够显示帧动画，仅支持png，jpeg 格式，可以配合 YYAnimatedImageView 来播放动画</li>
+<li>YYSpriteSheetImage : 同 YYFrameImage， 实现另一种动画形式，可以将一张图片自定义剪裁成多张图片来播放图片动画，同样可以配合YYAnimatedImageView 使用</li>
+<li>YYImageCoder : 图像的编码和解码功能类，<code>YYImageEncoder</code>负责编码，<code>YYImageDecoder</code> 负责解码，<code>YYImageFrame</code> 负责管理帧图像信息，<code>_YYImageDecoderFrame</code> 内部私有类是其子类</li>
+<li>YYAnimatedImageView:  UIImageView 子类，用于播放图像动画，定义了 YYAnimatedImage 协议</li>
+</ul>
+</blockquote>
+<h3 id="YYAnimatedImageView"><a href="#YYAnimatedImageView" class="headerlink" title="YYAnimatedImageView"></a>YYAnimatedImageView</h3><p>运行Demo，进入Animated Image 。有五种播放的图片动画，前三个图像格式分别是GIF，WebP，APNG，后两个分别转化成 YYFrameImage，YYSpriteSheetImage ，全部都是通过YYAnimatedImageView 播放动画的，我们进入 YYAnimatedImageView 来分析</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">- (instancetype)initWithImage:(UIImage *)image &#123;</div><div class="line">    self = [super init];</div><div class="line">    _runloopMode = NSRunLoopCommonModes;</div><div class="line">    _autoPlayAnimatedImage = YES;</div><div class="line">    self.frame = (CGRect) &#123;CGPointZero, image.size &#125;;</div><div class="line">    self.image = image;</div><div class="line">    return self;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>初始化方法只是一些简单的属性设置，默认<code>_autoPlayAnimatedImage</code> 为YES，自动开启动画，<code>_runloopMode</code> 为 <code>NSRunLoopCommonModes</code>,避免滑动时动画停止，因为以上的五种动画都是通过 <code>CADisplayLink</code>来实现的动画, 滑动时 mode 会切换到 <code>UITrackingRunLoopMode</code> 导致 <code>_link</code> 失效，代码中实现如下 ，保证滑动时依然有效<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">if (_runloopMode) &#123;</div><div class="line">      [_link addToRunLoop:[NSRunLoop mainRunLoop] forMode:_runloopMode];</div><div class="line"> &#125;</div></pre></td></tr></table></figure></p>
+<p>通过设置 <code>self.image = image;</code> 传入 <code>YYAnimatedImageTypeImage</code> type<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">- (void)setImage:(id)image withType:(YYAnimatedImageType)type &#123;</div><div class="line">   //停止动画</div><div class="line">    [self stopAnimating];</div><div class="line">  //重置动画</div><div class="line">    if (_link) [self resetAnimated];</div><div class="line">    _curFrame = nil;</div><div class="line">  //设置图片信息</div><div class="line">    switch (type) &#123;</div><div class="line">        case YYAnimatedImageTypeNone: break;</div><div class="line">        case YYAnimatedImageTypeImage: super.image = image; break;</div><div class="line">        case YYAnimatedImageTypeHighlightedImage: super.highlightedImage = image; break;</div><div class="line">        case YYAnimatedImageTypeImages: super.animationImages = image; break;</div><div class="line">        case YYAnimatedImageTypeHighlightedImages: super.highlightedAnimationImages = image; break;</div><div class="line">    &#125;</div><div class="line">   //图像信息改变处理</div><div class="line">    [self imageChanged];</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div></pre></td><td class="code"><pre><div class="line">- (void)imageChanged &#123;</div><div class="line">    YYAnimatedImageType newType = [self currentImageType];</div><div class="line">      //显示的图像</div><div class="line">    id newVisibleImage = [self imageForType:newType];</div><div class="line">    NSUInteger newImageFrameCount = 0;</div><div class="line">    BOOL hasContentsRect = NO;</div><div class="line">    if ([newVisibleImage isKindOfClass:[UIImage class]] &amp;&amp;</div><div class="line">        [newVisibleImage conformsToProtocol:@protocol(YYAnimatedImage)]) &#123;</div><div class="line">            //获取帧图像个数</div><div class="line">        newImageFrameCount = ((UIImage&lt;YYAnimatedImage&gt; *) newVisibleImage).animatedImageFrameCount;</div><div class="line">        if (newImageFrameCount &gt; 1) &#123;</div><div class="line">            //是否只显示部分图像，YYImage中只有YYSpriteSheetImage 实现了该协议方法</div><div class="line">            hasContentsRect = [((UIImage&lt;YYAnimatedImage&gt; *) newVisibleImage) respondsToSelector:@selector(animatedImageContentsRectAtIndex:)];</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    if (!hasContentsRect &amp;&amp; _curImageHasContentsRect) &#123;</div><div class="line">        if (!CGRectEqualToRect(self.layer.contentsRect, CGRectMake(0, 0, 1, 1)) ) &#123;</div><div class="line">            //一般不会走这部分代码，当且仅当上次是显示部分图像，现在显示完整图像，并且图层不完全显示时</div><div class="line">            [CATransaction begin];</div><div class="line">            [CATransaction setDisableActions:YES];</div><div class="line">            self.layer.contentsRect = CGRectMake(0, 0, 1, 1);</div><div class="line">            [CATransaction commit];</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    _curImageHasContentsRect = hasContentsRect;</div><div class="line">    if (hasContentsRect) &#123;</div><div class="line">        //获取首张尺寸大小，Demo中为 &#123;&#123;0, 0&#125;, &#123;32, 32&#125;&#125; </div><div class="line">        CGRect rect = [((UIImage&lt;YYAnimatedImage&gt; *) newVisibleImage) animatedImageContentsRectAtIndex:0];</div><div class="line">        [self setContentsRect:rect forImage:newVisibleImage];</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    if (newImageFrameCount &gt; 1) &#123;</div><div class="line">       //多张帧图像</div><div class="line">        [self resetAnimated];</div><div class="line">        _curAnimatedImage = newVisibleImage;</div><div class="line">        _curFrame = newVisibleImage;</div><div class="line">        _totalLoop = _curAnimatedImage.animatedImageLoopCount;</div><div class="line">        _totalFrameCount = _curAnimatedImage.animatedImageFrameCount;</div><div class="line">        [self calcMaxBufferCount];</div><div class="line">    &#125;</div><div class="line">    [self setNeedsDisplay];</div><div class="line">   //根据是否添加到父视图开始或停止动画</div><div class="line">    [self didMoved];</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>如果当前是 <code>YYSpriteSheetImage</code> 会进入到 <code>[self setContentsRect:rect forImage:newVisibleImage];</code> 此时设置 <code>self.layer.contentsRect ＝ CGRectMake(0, 0, 32 / image.size.width, 32 / image.size.height);</code>即裁剪的第一张图像</p>
+<p> <strong> 停止动画 </strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">- (void)stopAnimating &#123;</div><div class="line">    [super stopAnimating];</div><div class="line">    [_requestQueue cancelAllOperations];</div><div class="line">    _link.paused = YES;</div><div class="line">    self.currentIsPlayingAnimation = NO;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p> <strong> 开始动画 </strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">- (void)startAnimating &#123;</div><div class="line">    YYAnimatedImageType type = [self currentImageType];</div><div class="line">    if (type == YYAnimatedImageTypeImages || type == YYAnimatedImageTypeHighlightedImages) &#123;</div><div class="line">     // UIImageView 原始动画</div><div class="line">        NSArray *images = [self imageForType:type];</div><div class="line">        if (images.count &gt; 0) &#123;</div><div class="line">            [super startAnimating];</div><div class="line">            self.currentIsPlayingAnimation = YES;</div><div class="line">        &#125;</div><div class="line">    &#125; else &#123;</div><div class="line">      // 自定义动画</div><div class="line">        if (_curAnimatedImage &amp;&amp; _link.paused) &#123;</div><div class="line">            _curLoop = 0;</div><div class="line">            _loopEnd = NO;</div><div class="line">            _link.paused = NO;</div><div class="line">            self.currentIsPlayingAnimation = YES;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h4 id="自定义动画"><a href="#自定义动画" class="headerlink" title="自定义动画"></a>自定义动画</h4><p>准备工作，调用 <code>resetAnimated</code>, 在 <code>dispatch_once</code> 中初始化 <code>_requestQueue</code> , 设置<code>maxConcurrentOperationCount</code> 为1，串行执行请求图像任务，初始化<code>_link</code>，设置target为<code>_YYImageWeakProxy</code>,传入 <code>self</code> 赋值给 weak 属性 target，避免循环引用，添加到 mainRunLoop，mode 设置为   <code>NSRunLoopCommonModes</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div></pre></td><td class="code"><pre><div class="line">// init the animated params.</div><div class="line">- (void)resetAnimated &#123;</div><div class="line">    dispatch_once(&amp;_onceToken, ^&#123;</div><div class="line">        _lock = dispatch_semaphore_create(1);</div><div class="line">        _buffer = [NSMutableDictionary new];</div><div class="line">        _requestQueue = [[NSOperationQueue alloc] init];</div><div class="line">        _requestQueue.maxConcurrentOperationCount = 1;</div><div class="line">        _link = [CADisplayLink displayLinkWithTarget:[_YYImageWeakProxy proxyWithTarget:self] selector:@selector(step:)];</div><div class="line">        if (_runloopMode) &#123;</div><div class="line">            [_link addToRunLoop:[NSRunLoop mainRunLoop] forMode:_runloopMode];</div><div class="line">        &#125;</div><div class="line">        _link.paused = YES;</div><div class="line">        </div><div class="line">        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didReceiveMemoryWarning:) name:UIApplicationDidReceiveMemoryWarningNotification object:nil];</div><div class="line">        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didEnterBackground:) name:UIApplicationDidEnterBackgroundNotification object:nil];</div><div class="line">    &#125;);</div><div class="line">     //取消所有之前的操作</div><div class="line">    [_requestQueue cancelAllOperations];</div><div class="line">     //加锁 清除原来的图像数据</div><div class="line">    LOCK(</div><div class="line">         if (_buffer.count) &#123;</div><div class="line">             NSMutableDictionary *holder = _buffer;</div><div class="line">             _buffer = [NSMutableDictionary new];</div><div class="line">             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^&#123;</div><div class="line">                 // Capture the dictionary to global queue,</div><div class="line">                 // release these images in background to avoid blocking UI thread.</div><div class="line">                 [holder class];</div><div class="line">             &#125;);</div><div class="line">         &#125;</div><div class="line">    );</div><div class="line">   //初始化属性设置</div><div class="line">    _link.paused = YES;</div><div class="line">    _time = 0;</div><div class="line">    if (_curIndex != 0) &#123;</div><div class="line">        [self willChangeValueForKey:@&quot;currentAnimatedImageIndex&quot;];</div><div class="line">        _curIndex = 0;</div><div class="line">        [self didChangeValueForKey:@&quot;currentAnimatedImageIndex&quot;];</div><div class="line">    &#125;</div><div class="line">    _curAnimatedImage = nil;</div><div class="line">    _curFrame = nil;</div><div class="line">    _curLoop = 0;</div><div class="line">    _totalLoop = 0;</div><div class="line">    _totalFrameCount = 1;</div><div class="line">    _loopEnd = NO;</div><div class="line">    _bufferMiss = NO;</div><div class="line">    _incrBufferCount = 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>开启 <code>_link</code> ，以大约每秒60次的频率（屏幕刷新频率）调用 <code>step:(CADisplayLink *)link</code>  其中 <code>_buffer</code> 存储图像数据， <code>_YYAnimatedImageViewFetchOperation</code> 用于获取图像数据 实现代码在 <code>main</code>  方法中的 <code>UIImage *img = [_curImage animatedImageFrameAtIndex:idx];</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div></pre></td><td class="code"><pre><div class="line">- (void)step:(CADisplayLink *)link &#123;</div><div class="line">    //当前显示的图像， 必须遵守 YYAnimatedImage 协议</div><div class="line">    UIImage &lt;YYAnimatedImage&gt; *image = _curAnimatedImage;</div><div class="line">  // 获取当前的图像数据字典</div><div class="line">    NSMutableDictionary *buffer = _buffer;</div><div class="line">  //下张要显示的图像</div><div class="line">    UIImage *bufferedImage = nil;</div><div class="line">  //下一张显示图像的Index</div><div class="line">    NSUInteger nextIndex = (_curIndex + 1) % _totalFrameCount;</div><div class="line"> //是否获取所有图像数据</div><div class="line">    BOOL bufferIsFull = NO;</div><div class="line">    //当前无图像直接返回</div><div class="line">    if (!image) return;</div><div class="line">   // 结束动画</div><div class="line">    if (_loopEnd) &#123; // view will keep in last frame</div><div class="line">        [self stopAnimating];</div><div class="line">        return;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    NSTimeInterval delay = 0;</div><div class="line">  //下张图像存在</div><div class="line">    if (!_bufferMiss) &#123;</div><div class="line">        // 累加时间，保证当前图像的显示时间为delay</div><div class="line">        _time += link.duration;</div><div class="line">        delay = [image animatedImageDurationAtIndex:_curIndex];</div><div class="line">        if (_time &lt; delay) return;</div><div class="line">        //减去当前图像时间，保证下张图像显示时间正确</div><div class="line">        _time -= delay;</div><div class="line">        if (nextIndex == 0) &#123;</div><div class="line">           //循环次数加1</div><div class="line">            _curLoop++;</div><div class="line">            if (_curLoop &gt;= _totalLoop &amp;&amp; _totalLoop != 0) &#123;</div><div class="line">                 //总循环次数不为0时，且当前循环次数大于总循环次数，关闭动画</div><div class="line">                _loopEnd = YES;</div><div class="line">                [self stopAnimating];</div><div class="line">                [self.layer setNeedsDisplay]; // let system call `displayLayer:` before runloop sleep</div><div class="line">                return; // stop at last frame</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">// 如果当前累加时间还是大于下张显示时间，设置累加时间为delay，避免直接跳过下张图像显示</div><div class="line">        delay = [image animatedImageDurationAtIndex:nextIndex];</div><div class="line">        if (_time &gt; delay) _time = delay; // do not jump over frame</div><div class="line">    &#125;</div><div class="line">    // 加锁获取并显示下张图像</div><div class="line">    LOCK(</div><div class="line">         bufferedImage = buffer[@(nextIndex)];</div><div class="line">         if (bufferedImage) &#123;</div><div class="line">             if ((int)_incrBufferCount &lt; _totalFrameCount) &#123;</div><div class="line">                 // 还未完全获取所有图像时，清除下一张图像数据，保证数据正确</div><div class="line">                 [buffer removeObjectForKey:@(nextIndex)];</div><div class="line">             &#125;</div><div class="line">            //更新当前Index</div><div class="line">             [self willChangeValueForKey:@&quot;currentAnimatedImageIndex&quot;];</div><div class="line">             _curIndex = nextIndex;</div><div class="line">             [self didChangeValueForKey:@&quot;currentAnimatedImageIndex&quot;];</div><div class="line">            // 更新当前图像</div><div class="line">             _curFrame = bufferedImage == (id)[NSNull null] ? nil : bufferedImage;</div><div class="line">             if (_curImageHasContentsRect) &#123;</div><div class="line">            // YYSpriteSheetImage ：获取当前Index下的部分图像 Rect，设置 对应的 self.layer.contentsRect</div><div class="line">                 _curContentsRect = [image animatedImageContentsRectAtIndex:_curIndex];</div><div class="line">                 [self setContentsRect:_curContentsRect forImage:_curFrame];</div><div class="line">             &#125;</div><div class="line">             nextIndex = (_curIndex + 1) % _totalFrameCount;</div><div class="line">             _bufferMiss = NO;</div><div class="line">             if (buffer.count == _totalFrameCount) &#123;</div><div class="line">                //已获取所有图像</div><div class="line">                 bufferIsFull = YES;</div><div class="line">             &#125;</div><div class="line">         &#125; else &#123;</div><div class="line">             _bufferMiss = YES;</div><div class="line">         &#125;</div><div class="line">    )//LOCK</div><div class="line">    </div><div class="line">    if (!_bufferMiss) &#123;</div><div class="line">      //更新图像  layer.contents = (__bridge id)_curFrame.CGImage;</div><div class="line">        [self.layer setNeedsDisplay]; // let system call `displayLayer:` before runloop sleep</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    if (!bufferIsFull &amp;&amp; _requestQueue.operationCount == 0) &#123; // if some work not finished, wait for next opportunity</div><div class="line">//还未获取所有图像，交给_YYAnimatedImageViewFetchOperation 获取下一张图像</div><div class="line">        _YYAnimatedImageViewFetchOperation *operation = [_YYAnimatedImageViewFetchOperation new];</div><div class="line">        operation.view = self;</div><div class="line">        operation.nextIndex = nextIndex;</div><div class="line">        operation.curImage = image;</div><div class="line">        [_requestQueue addOperation:operation];</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><strong> 主要流程： </strong></p>
+<blockquote>
+<ol>
+<li>确保当前图像存在，并且循环未结束</li>
+<li>如果还在当前图像显示时间内，返回 </li>
+<li>进入下张图像显示，如存在直接显示，并更新相应属性数据，如不存在，初始化一个operation，获取下一张图像数据</li>
+</ol>
+</blockquote>
+<h4 id="YYAnimatedImageViewFetchOperation-实现获取下张图像"><a href="#YYAnimatedImageViewFetchOperation-实现获取下张图像" class="headerlink" title="_YYAnimatedImageViewFetchOperation 实现获取下张图像"></a>_YYAnimatedImageViewFetchOperation 实现获取下张图像</h4><p><code>_YYAnimatedImageViewFetchOperation</code> 是 <code>NSOperation</code>的子类, 用来执行获取图像操作。通过自定义main 方法实现，每添加一个 <code>operation</code>, <code>_incrBufferCount ++</code>, 遍历 <code>_buffer</code>, 获取丢失的图像。具体获取图像通过协议方法 <code>animatedImageFrameAtIndex:</code> 获取</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div></pre></td><td class="code"><pre><div class="line">- (void)main &#123;</div><div class="line">    </div><div class="line">    __strong YYAnimatedImageView *view = _view;</div><div class="line">    if (!view) return;</div><div class="line">    if ([self isCancelled]) return;</div><div class="line">    view-&gt;_incrBufferCount++;</div><div class="line">    if (view-&gt;_incrBufferCount == 0) [view calcMaxBufferCount];</div><div class="line">    if (view-&gt;_incrBufferCount &gt; (NSInteger)view-&gt;_maxBufferCount) &#123;</div><div class="line">        view-&gt;_incrBufferCount = view-&gt;_maxBufferCount;</div><div class="line">    &#125;</div><div class="line">  </div><div class="line">    NSUInteger idx = _nextIndex;</div><div class="line">    //当前已尝试获取的图像的次数，不大于 最大图像数</div><div class="line">    NSUInteger max = view-&gt;_incrBufferCount &lt; 1 ? 1 : view-&gt;_incrBufferCount;</div><div class="line">    NSUInteger total = view-&gt;_totalFrameCount;</div><div class="line">    view = nil;</div><div class="line">    </div><div class="line">    for (int i = 0; i &lt; max; i++, idx++) &#123;</div><div class="line">      //遍历当前所需的图像 Index，按下一张显示图像Index 开始查找</div><div class="line">        @autoreleasepool &#123;</div><div class="line">            if (idx &gt;= total) idx = 0;</div><div class="line">            if ([self isCancelled]) break;</div><div class="line">            __strong YYAnimatedImageView *view = _view;</div><div class="line">            if (!view) break;</div><div class="line">            //图像是否丢失</div><div class="line">            LOCK_VIEW(BOOL miss = (view-&gt;_buffer[@(idx)] == nil));</div><div class="line">            </div><div class="line">            if (miss) &#123;</div><div class="line">            //重新获取丢失图像</div><div class="line">                UIImage *img = [_curImage animatedImageFrameAtIndex:idx];</div><div class="line">                img = img.yy_imageByDecoded;</div><div class="line">                if ([self isCancelled]) break;</div><div class="line">                LOCK_VIEW(view-&gt;_buffer[@(idx)] = img ? img : [NSNull null]);</div><div class="line">                view = nil;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><strong> 获取图像 </strong><br><code>YYImage</code> <code>YYFrameImage</code> <code>YYSpriteSheetImage</code> 都实现了 <code>YYAnimatedImage</code> 协议方法，后两个比较简单，主要来看 <code>YYImage</code>, 内部获取图像通过 <code>_decoder</code> 实现， 其中 <code>preloadAllAnimatedImageFrames</code> 属性可以用来预先加载所有图像数据<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">- (UIImage *)animatedImageFrameAtIndex:(NSUInteger)index &#123;</div><div class="line">    if (index &gt;= _decoder.frameCount) return nil;</div><div class="line">    dispatch_semaphore_wait(_preloadedLock, DISPATCH_TIME_FOREVER);</div><div class="line">    UIImage *image = _preloadedFrames[index];</div><div class="line">    dispatch_semaphore_signal(_preloadedLock);</div><div class="line">    if (image) return image == (id)[NSNull null] ? nil : image;</div><div class="line">    return [_decoder frameAtIndex:index decodeForDisplay:YES].image;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h3 id="YYImageCoder"><a href="#YYImageCoder" class="headerlink" title="YYImageCoder"></a>YYImageCoder</h3><p>最终获取图像调用到 <code>YYImageDecoder</code>内部，返回一个 <code>YYImageFrame</code>实例，存储了图像信息。可以参考文章<a href="http://blog.ibireme.com/2015/11/02/mobile_image_benchmark/" target="_blank" rel="external">移动端图片格式调研</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">- (YYImageFrame *)frameAtIndex:(NSUInteger)index decodeForDisplay:(BOOL)decodeForDisplay &#123;</div><div class="line">    YYImageFrame *result = nil;</div><div class="line">    pthread_mutex_lock(&amp;_lock);</div><div class="line">    result = [self _frameAtIndex:index decodeForDisplay:decodeForDisplay];</div><div class="line">    pthread_mutex_unlock(&amp;_lock);</div><div class="line">    return result;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><strong> 图像解码主要方法 </strong><br>根据传入的图像data 更新数据到 <code>_frames</code> 数组 ，里面存储的是 <code>_YYImageDecoderFrame</code> 。大致有三类图片数据，webP，APNG， 其他。<br>webP 图片通过Google的 WebP.framework 实现，APNG是 自定义实现的图像解码，其他的通过 ImageIO 框架实现的<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">- (void)_updateSource &#123;</div><div class="line">    switch (_type) &#123;</div><div class="line">        case YYImageTypeWebP: &#123;</div><div class="line">         </div><div class="line">            [self _updateSourceWebP];</div><div class="line">        &#125; break;</div><div class="line">            </div><div class="line">        case YYImageTypePNG: &#123;</div><div class="line">            [self _updateSourceAPNG];</div><div class="line">        &#125; break;</div><div class="line">            </div><div class="line">        default: &#123;</div><div class="line">            [self _updateSourceImageIO];</div><div class="line">        &#125; break;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>主要看一下 <code>_updateSourceImageIO</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div></pre></td><td class="code"><pre><div class="line">- (void)_updateSourceImageIO &#123;</div><div class="line">   //图像宽，高，显示方向初始化, 循环次数， 0 代表无限</div><div class="line">    _width = 0;</div><div class="line">    _height = 0;</div><div class="line">    _orientation = UIImageOrientationUp;</div><div class="line">    _loopCount = 0;</div><div class="line">  //清除原来的数据</div><div class="line">    dispatch_semaphore_wait(_framesLock, DISPATCH_TIME_FOREVER);</div><div class="line">    _frames = nil;</div><div class="line">    dispatch_semaphore_signal(_framesLock);</div><div class="line">    // 处理图像源</div><div class="line">    if (!_source) &#123;</div><div class="line">        if (_finalized) &#123;</div><div class="line">            _source = CGImageSourceCreateWithData((__bridge CFDataRef)_data, NULL);</div><div class="line">        &#125; else &#123;</div><div class="line">            _source = CGImageSourceCreateIncremental(NULL);</div><div class="line">            if (_source) CGImageSourceUpdateData(_source, (__bridge CFDataRef)_data, false);</div><div class="line">        &#125;</div><div class="line">    &#125; else &#123;</div><div class="line">        CGImageSourceUpdateData(_source, (__bridge CFDataRef)_data, _finalized);</div><div class="line">    &#125;</div><div class="line">    if (!_source) return;</div><div class="line">    //获取图像个数</div><div class="line">    _frameCount = CGImageSourceGetCount(_source);</div><div class="line">    if (_frameCount == 0) return;</div><div class="line">    </div><div class="line">    if (!_finalized) &#123; // ignore multi-frame before finalized</div><div class="line">        _frameCount = 1;</div><div class="line">    &#125; else &#123;</div><div class="line">        if (_type == YYImageTypePNG) &#123; // use custom apng decoder and ignore multi-frame</div><div class="line">            _frameCount = 1;</div><div class="line">        &#125;</div><div class="line">        if (_type == YYImageTypeGIF) &#123; // get gif loop count</div><div class="line">            CFDictionaryRef properties = CGImageSourceCopyProperties(_source, NULL);</div><div class="line">            if (properties) &#123;</div><div class="line">                CFDictionaryRef gif = CFDictionaryGetValue(properties, kCGImagePropertyGIFDictionary);</div><div class="line">                if (gif) &#123;</div><div class="line">                    CFTypeRef loop = CFDictionaryGetValue(gif, kCGImagePropertyGIFLoopCount);</div><div class="line">                    if (loop) CFNumberGetValue(loop, kCFNumberNSIntegerType, &amp;_loopCount);</div><div class="line">                &#125;</div><div class="line">                CFRelease(properties);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    /*</div><div class="line">     ICO, GIF, APNG may contains multi-frame.</div><div class="line">     */</div><div class="line">    NSMutableArray *frames = [NSMutableArray new];</div><div class="line">    for (NSUInteger i = 0; i &lt; _frameCount; i++) &#123;</div><div class="line">        _YYImageDecoderFrame *frame = [_YYImageDecoderFrame new];</div><div class="line">        frame.index = i;</div><div class="line">        frame.blendFromIndex = i;</div><div class="line">        frame.hasAlpha = YES;</div><div class="line">        frame.isFullSize = YES;</div><div class="line">        [frames addObject:frame];</div><div class="line">        // 获取图像源属性信息</div><div class="line">        CFDictionaryRef properties = CGImageSourceCopyPropertiesAtIndex(_source, i, NULL);</div><div class="line">        if (properties) &#123;</div><div class="line">            NSTimeInterval duration = 0;</div><div class="line">            NSInteger orientationValue = 0, width = 0, height = 0;</div><div class="line">            CFTypeRef value = NULL;</div><div class="line">            //图像宽</div><div class="line">            value = CFDictionaryGetValue(properties, kCGImagePropertyPixelWidth);</div><div class="line">            if (value) CFNumberGetValue(value, kCFNumberNSIntegerType, &amp;width);</div><div class="line">           //图像高</div><div class="line">            value = CFDictionaryGetValue(properties, kCGImagePropertyPixelHeight);</div><div class="line">            if (value) CFNumberGetValue(value, kCFNumberNSIntegerType, &amp;height);</div><div class="line">            if (_type == YYImageTypeGIF) &#123;</div><div class="line">                CFDictionaryRef gif = CFDictionaryGetValue(properties, kCGImagePropertyGIFDictionary);</div><div class="line">                if (gif) &#123;</div><div class="line">                    // Use the unclamped frame delay if it exists.</div><div class="line">                    value = CFDictionaryGetValue(gif, kCGImagePropertyGIFUnclampedDelayTime);</div><div class="line">                    if (!value) &#123;</div><div class="line">                        // Fall back to the clamped frame delay if the unclamped frame delay does not exist.</div><div class="line">                        value = CFDictionaryGetValue(gif, kCGImagePropertyGIFDelayTime);</div><div class="line">                    &#125;</div><div class="line">                  // gif 图像时间</div><div class="line">                    if (value) CFNumberGetValue(value, kCFNumberDoubleType, &amp;duration);</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            //赋值</div><div class="line">            frame.width = width;</div><div class="line">            frame.height = height;</div><div class="line">            frame.duration = duration;</div><div class="line">            </div><div class="line">            if (i == 0 &amp;&amp; _width + _height == 0) &#123; // init first frame</div><div class="line">                _width = width;</div><div class="line">                _height = height;</div><div class="line">                value = CFDictionaryGetValue(properties, kCGImagePropertyOrientation);</div><div class="line">                if (value) &#123;</div><div class="line">                    CFNumberGetValue(value, kCFNumberNSIntegerType, &amp;orientationValue);</div><div class="line">                    _orientation = YYUIImageOrientationFromEXIFValue(orientationValue);</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            CFRelease(properties);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    dispatch_semaphore_wait(_framesLock, DISPATCH_TIME_FOREVER);</div><div class="line">    _frames = frames;</div><div class="line">    dispatch_semaphore_signal(_framesLock);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>通过最初的图像解码得到指定Index的frame，<br> <code>_YYImageDecoderFrame *frame = [(_YYImageDecoderFrame *)_frames[index] copy];</code><br>采用画布进行渲染, 最终获得图像 <code>frame.image = image;</code></p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>Title:</span><a href="/2017/02/04/YYImage/">YYImage源码分析</a></p>
+        <p><span>Author:</span><a href="/" title="Back to Homepage">Chen Ao</a></p>
+        <p><span>Created:</span>2017-02-04, 18:14:59</p>
+        <p><span>Updated:</span>2017-02-04, 18:16:09</p>
+        <p>
+            <span>Full URL:</span><a class="post-url" href="/2017/02/04/YYImage/" title="YYImage源码分析">http://ChenAo0727.github.io/2017/02/04/YYImage/</a>
+            <span class="copy-path" data-clipboard-text="From http://ChenAo0727.github.io/2017/02/04/YYImage/　　By Chen Ao" title="Copy Article&#39;s Link &amp; Author"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>License:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target = "_blank">"CC BY-NC-SA 4.0"</a> Keep Link &amp; Author if Distribute.
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2017/01/22/YYText/">
+                    YYText源码分析
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">Contents</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#特性："><span class="toc-number">1.1.</span> <span class="toc-text"> 特性：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#文件结构"><span class="toc-number">1.2.</span> <span class="toc-text"> 文件结构 </span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#YYAnimatedImageView"><span class="toc-number">2.</span> <span class="toc-text">YYAnimatedImageView</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#自定义动画"><span class="toc-number">2.1.</span> <span class="toc-text">自定义动画</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#YYAnimatedImageViewFetchOperation-实现获取下张图像"><span class="toc-number">2.2.</span> <span class="toc-text">_YYAnimatedImageViewFetchOperation 实现获取下张图像</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#YYImageCoder"><span class="toc-number">3.</span> <span class="toc-text">YYImageCoder</span></a></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="Hide"  title="Show or Hide Table of Contents">
+
+    <script>
+        yiliaConfig.toc = ["Hide", "Show", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"YYImage源码分析　| 夜空中最亮的星　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+      <div class="duoshuo" id="comments">
+    <div id="comment-box" ></div>
+    <div class="ds-thread" id="ds-thread" data-thread-key="2017/02/04/YYImage/" data-title="YYImage源码分析" data-url="http://ChenAo0727.github.io/2017/02/04/YYImage/"></div>
+    <script>
+        var duoshuoQuery = {short_name:"chenao0727github"};
+        var loadComment = function(){
+            var d = document, s = d.createElement('script');
+            s.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+            s.async = true; s.charset = 'UTF-8';
+            (d.head || d.body).appendChild(s);
+        }
+
+        
+    </script>
+    
+    <script> loadComment(); </script>
+
+</div>
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/" title="Back to Homepage"><i class="fa fa-home"></i></a>
+        
+
+        <a title="Mini Archives"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2017/01/22/YYText/" title="Next: YYText源码分析">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/02/04/YYImage/">YYImage源码分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/22/YYText/">YYText源码分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/03/YYModel/">YYModel源码分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/28/hexo/">Hexo + Github-Pages 从零开始搭建个人博客</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/27/Swift-closure/">Swift 闭包</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/26/Kingfisher/">Kingfisher 3.x 学习（一）</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/26/Kingfisher2/">Kingfisher 3.x 学习（二）</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2016-2017 Chen Ao
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="A fast, simple &amp; powerful blog framework">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="Another simple and elegant theme for Hexo  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" title="Site Visitors"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit"  title="Page Hits"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 5;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="Back to Top"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="Comments"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="Go to Bottom"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>
